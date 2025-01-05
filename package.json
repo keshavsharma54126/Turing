@@ -1,4 +1,3 @@
-
 {
   "name": "turing",
   "private": true,
@@ -20,5 +19,8 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "dotenv": "^16.4.7"
+  }
 }

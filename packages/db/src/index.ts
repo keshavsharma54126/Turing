@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { VectorService } from './services/vector-service';
+import { GeminiService } from './services/gemini-service';
 
 declare global {
   var prisma: PrismaClient | undefined;
@@ -11,5 +12,5 @@ if (process.env.NODE_ENV !== 'production') {
   global.prisma = prisma;
 }
 
-export { VectorService };
+export { VectorService, GeminiService };
 export * from '@prisma/client';
