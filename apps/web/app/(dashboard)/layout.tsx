@@ -22,7 +22,7 @@ const Sidebar = () => {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="lg:hidden fixed top-6 left-4 z-50 dashboard-button p-2"
+        className="lg:hidden fixed top-4 left-4 z-30 dashboard-button p-2 h-10 w-10 flex items-center justify-center rounded-full"
         aria-label="Toggle menu"
       >
         {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -32,10 +32,10 @@ const Sidebar = () => {
       <div
         className={`${
           isOpen ? 'translate-x-0' : '-translate-x-full'
-        } lg:translate-x-0 transition-transform duration-300 w-64 h-screen bg-[#1B4D3E] text-white fixed left-0 top-0 p-4 z-40 dashboard-card`}
+        } lg:translate-x-0 transition-transform duration-300 w-64 h-screen bg-[#1B4D3E] text-white fixed left-0 top-0 p-4 z-20 inset-0 dashboard-card`}
       >
         <div className="mb-8 pt-4">
-          <h1 className="text-xl font-bold text-white text-center">TURING AI</h1>
+          <h1 className="text-2xl font-bold text-[#2A6B5D] text-center">TURING AI</h1>
         </div>
         <nav>
           {menuItems.map((item) => (
@@ -55,7 +55,7 @@ const Sidebar = () => {
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-white/80 z-30 lg:hidden backdrop-blur-sm"
+          className="fixed inset-0 lg:hidden z-30"
           onClick={() => setIsOpen(false)}
         />
       )}
@@ -81,11 +81,13 @@ const Navbar = () => {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
-    <div className="dashboard-layout min-h-screen dashboard-grid">
-      <Sidebar />
-      <Navbar />
-      <main className="pt-16 p-6 lg:pl-64">
-        <div className="dashboard-card p-6 lg:mt-10 lg:ml-10 dashboard-grid ">
+    <div className="flex dashboard-layout min-h-screen dashboard-grid">
+     <div className='flex flex-col'>
+     <Sidebar />
+     <Navbar />
+     </div>
+      <main className="flex-1 justify-center items-center p-6 pt-24 ">
+        <div className="fixed lg:relative first-letter:dashboard-card p-6 dashboard-grid left-0">
           {children}
         </div>
       </main>
