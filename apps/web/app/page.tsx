@@ -1,21 +1,110 @@
+"use client"
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+
+// Register ChartJS components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 function Navbar() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
     <nav className="fixed w-full bg-white/80 backdrop-blur-sm border-b border-gray-200 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link href="/" className="text-2xl font-bold">
+            <Link href="/" className="text-xl sm:text-2xl font-bold">
               TURING AI
             </Link>
           </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="brutalist-button p-2"
+              aria-label="Toggle menu"
+            >
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                {isMenuOpen ? (
+                  <path d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          </div>
+
+          {/* Desktop menu */}
           <div className="hidden md:flex items-center space-x-8">
             <Link href="/features" className="text-gray-600 hover:text-gray-900">Features</Link>
             <Link href="/pricing" className="text-gray-600 hover:text-gray-900">Pricing</Link>
             <Link href="/about" className="text-gray-600 hover:text-gray-900">About</Link>
             <Link href="/signin" className="brutalist-button px-4 py-2 text-sm">Sign In</Link>
+          </div>
+        </div>
+
+        {/* Mobile menu */}
+        <div className={`md:hidden ${isMenuOpen ? 'block' : 'hidden'}`}>
+          <div className="px-2 pt-2 pb-3 space-y-1 bg-white/90 backdrop-blur-sm border-t border-gray-200">
+            <Link 
+              href="/features" 
+              className="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Features
+            </Link>
+            <Link 
+              href="/pricing" 
+              className="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Pricing
+            </Link>
+            <Link 
+              href="/about" 
+              className="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              About
+            </Link>
+            <Link 
+              href="/signin" 
+              className="block px-3 py-2 brutalist-button text-center"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Sign In
+            </Link>
           </div>
         </div>
       </div>
@@ -38,10 +127,10 @@ export default function Home() {
           <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div className="text-left">
-                <h1 className="text-6xl md:text-7xl font-bold mb-6 gradient-text leading-tight">
+                <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold mb-6 gradient-text leading-tight">
                   Transform Learning with AI
                 </h1>
-                <p className="text-xl md:text-2xl mb-12 font-mono text-gray-700 leading-relaxed">
+                <p className="text-lg sm:text-xl md:text-2xl mb-12 font-mono text-gray-700 leading-relaxed">
                   Generate intelligent tests and get personalized tutoring powered by advanced AI
                 </p>
                 <div className="flex flex-col sm:flex-row gap-6">
@@ -55,13 +144,85 @@ export default function Home() {
               </div>
               
               <div className="relative h-[500px] hidden md:block">
-                <div className="absolute inset-0 brutalist-card overflow-hidden">
-                  <Image
-                    src="/hero-illustration.png"
-                    alt="AI Learning Illustration"
-                    fill
-                    className="object-cover"
-                    priority
+                <div className="absolute inset-0 brutalist-card p-6 bg-white">
+                  <Line
+                    data={{
+                      labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
+                      datasets: [
+                        {
+                          label: 'Average Student Score',
+                          data: [65, 68, 72, 78, 85, 92],
+                          borderColor: '#B8D8E3',
+                          backgroundColor: 'rgba(184, 216, 227, 0.2)',
+                          tension: 0.4,
+                          fill: true,
+                        },
+                        {
+                          label: 'With Turing AI',
+                          data: [67, 75, 82, 88, 92, 96],
+                          borderColor: '#F7CAC9',
+                          backgroundColor: 'rgba(247, 202, 201, 0.2)',
+                          tension: 0.4,
+                          fill: true,
+                        }
+                      ]
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          position: 'top',
+                          labels: {
+                            font: {
+                              family: 'monospace'
+                            }
+                          }
+                        },
+                        title: {
+                          display: true,
+                          text: 'Student Performance Improvement',
+                          font: {
+                            size: 16,
+                            family: 'monospace',
+                            weight: 'bold'
+                          }
+                        }
+                      },
+                      scales: {
+                        y: {
+                          min: 60,
+                          max: 100,
+                          ticks: {
+                            callback: value => `${value}%`,
+                            font: {
+                              family: 'monospace'
+                            }
+                          },
+                          grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                          }
+                        },
+                        x: {
+                          grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                          },
+                          ticks: {
+                            font: {
+                              family: 'monospace'
+                            }
+                          }
+                        }
+                      },
+                      animation: {
+                        duration: 2000,
+                        easing: 'easeInOutQuart'
+                      },
+                      interaction: {
+                        intersect: false,
+                        mode: 'index'
+                      }
+                    }}
                   />
                 </div>
                 <div className="absolute -bottom-4 -right-4 w-full h-full brutalist-card bg-[#B8D8E3]/20 -z-10"></div>
@@ -74,7 +235,7 @@ export default function Home() {
         <section className="py-24 bg-[#FFE8D6]/90">
           <div className="absolute inset-0 pattern-grid opacity-30"></div>
           <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
               {[
                 { number: "50K+", label: "Active Students", bg: "bg-[#FFE2E0]" },
                 { number: "1M+", label: "Tests Generated", bg: "bg-[#E0F4FF]" },
@@ -95,7 +256,7 @@ export default function Home() {
           <div className="absolute inset-0 pattern-grid opacity-30"></div>
           <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-4xl font-bold text-center mb-16">Features</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               <div className="brutalist-card bg-[#B8D8E3] p-8">
                 <h2 className="text-2xl font-bold mb-4">AI Test Generation</h2>
                 <p className="font-mono">
@@ -132,7 +293,7 @@ export default function Home() {
           <div className="absolute inset-0 pattern-grid opacity-30"></div>
           <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-4xl font-bold text-center mb-16">Smart Study Tools</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-12">
               <div className="brutalist-card bg-[#E0F4FF] p-8 hover:transform hover:scale-105 transition-transform">
                 <div className="flex items-start space-x-4">
                   <div className="p-3 bg-[#AED2E6] rounded-lg">
@@ -198,7 +359,7 @@ export default function Home() {
           <div className="absolute inset-0 pattern-grid opacity-30"></div>
           <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-4xl font-bold text-center mb-16">Student Success Stories</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
               {[
                 {
                   name: "Sarah K.",
@@ -269,7 +430,7 @@ export default function Home() {
           <div className="absolute inset-0 pattern-grid opacity-30"></div>
           <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <p className="text-center font-mono text-gray-600 mb-8">Trusted by leading educational institutions</p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 items-center">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 items-center">
               {/* Add your integration/partner logos here */}
               {/* Example placeholder divs for logos */}
               <div className="h-12 bg-white/50 rounded flex items-center justify-center">Logo 1</div>
@@ -285,7 +446,7 @@ export default function Home() {
           <div className="absolute inset-0 pattern-grid opacity-30"></div>
           <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-4xl font-bold text-center mb-16">How It Works</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
               <div className="text-center">
                 <div className="brutalist-card bg-[#E0F4FF] p-8 aspect-square flex flex-col items-center justify-center">
                   <div className="text-4xl font-bold mb-4">1</div>
@@ -316,7 +477,7 @@ export default function Home() {
           <div className="absolute inset-0 pattern-grid opacity-30"></div>
           <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-4xl font-bold text-center mb-16">Pricing</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
               <div className="brutalist-card bg-white p-8">
                 <h3 className="text-2xl font-bold mb-2">Free</h3>
                 <div className="text-4xl font-bold mb-4">$0<span className="text-xl">/mo</span></div>
@@ -361,7 +522,7 @@ export default function Home() {
         <footer className="bg-[#333333] text-white py-16 relative">
           <div className="absolute inset-0 pattern-grid opacity-10"></div>
           <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12">
               <div>
                 <h3 className="text-2xl font-bold mb-4">TURING AI</h3>
                 <p className="font-mono text-sm text-gray-400">

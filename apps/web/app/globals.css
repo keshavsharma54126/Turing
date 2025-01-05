@@ -3,13 +3,12 @@
 @tailwind utilities;
 
 :root {
-  --pastel-blue: #B8D8E3;
-  --pastel-pink: #F7CAC9;
-  --pastel-yellow: #F6E6B4;
-  --pastel-green: #C3E6CB;
-  --dark-gray: #333333;
-  --beige: #F5F5DC;
-  --light-beige: #F8F7F2;
+  --primary: #2A2F4F;
+  --secondary: #917FB3;
+  --accent: #E5BEEC;
+  --background: #FDE2F3;
+  --text-primary: #2A2F4F;
+  --text-secondary: #917FB3;
 }
 
 body {
@@ -21,30 +20,33 @@ body {
 }
 
 .brutalist-card {
-  border: 3px solid var(--dark-gray);
-  box-shadow: 8px 8px 0 var(--dark-gray);
+  border: 3px solid var(--primary);
+  box-shadow: 8px 8px 0 var(--primary);
   transition: all 0.2s ease;
 }
 
 .brutalist-card:hover {
   transform: translate(-4px, -4px);
-  box-shadow: 12px 12px 0 var(--dark-gray);
+  box-shadow: 12px 12px 0 var(--primary);
 }
 
 .brutalist-button {
-  border: 2px solid var(--dark-gray);
-  background: var(--pastel-blue);
-  box-shadow: 4px 4px 0 var(--dark-gray);
+  border: 2px solid var(--primary);
+  background: var(--secondary);
+  box-shadow: 4px 4px 0 var(--primary);
   transition: all 0.2s ease;
   text-transform: uppercase;
   letter-spacing: 1px;
   position: relative;
   isolation: isolate;
+  color: white;
 }
 
 .brutalist-button:hover {
   transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0 var(--dark-gray);
+  box-shadow: 6px 6px 0 var(--primary);
+  background: var(--accent);
+  color: var(--primary);
 }
 
 .brutalist-button:active {
