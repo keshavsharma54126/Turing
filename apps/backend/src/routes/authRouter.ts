@@ -21,7 +21,7 @@ authRouter.post("/signup", async(req:any, res:any) => {
         const hashedPassword = await bcryptjs.hash(password,10)
 
         const user = await prisma.user.create({data:{username,email,password:hashedPassword}})
-        return res.status(201).json({message:"User created",user})
+        return res.status(200).json({message:"User created",user})
 
     }catch(error){
         return res.status(500).json({message:"Internal server error",error})
@@ -51,7 +51,38 @@ authRouter.post("/signin", async(req:any, res:any) => {
     }
 });
 
-authRouter.get("/google-signin", async(req:any, res:any) => {
-    
+authRouter.post("/google-signin", async(req:any, res:any) => {
+    try{
+        const parsedData  = req.body.decoded
+        console.log("parsedData",parsedData)
+        const user = await prisma.user.findUnique({
+          where:{
+            email:parsedData.email
+          }
+        })
+        if(user){
+          const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET);
+          return res.status(200).json({
+            token
+          })
+        }
+        const newUser = await prisma.user.create({
+          data:{
+            email:parsedData.email,
+            username:parsedData.name,
+            password:"",
+            role:"USER",
+            profileImage:parsedData.picture
+          }
+        })
+        const token = jwt.sign({ id: newUser.id, username: newUser.username, email: newUser.email }, JWT_SECRET);
+        return res.status(200).json({
+          token
+        })
+      }catch(e){
+        return res.status(400).json({
+          message: "invalid data",
+        });
+      }
 });
 

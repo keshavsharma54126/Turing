@@ -14,6 +14,7 @@ import {
   Legend,
   Filler
 } from 'chart.js';
+import { useRouter } from 'next/navigation';
 
 // Register ChartJS components
 ChartJS.register(
@@ -113,6 +114,7 @@ function Navbar() {
 }
 
 export default function Home() {
+  const router = useRouter();
   return (
     <div className="min-h-screen gradient-bg relative">
       <div className="absolute inset-0 pattern-grid opacity-30"></div>
@@ -134,7 +136,7 @@ export default function Home() {
                   Generate intelligent tests and get personalized tutoring powered by advanced AI
                 </p>
                 <div className="flex flex-col sm:flex-row gap-6">
-                  <button className="brutalist-button px-8 py-4 text-lg font-bold bg-[#B8D8E3] hover:bg-[#9CC5D3]">
+                  <button onClick={() => router.push('/home')} className="brutalist-button px-8 py-4 text-lg font-bold bg-[#B8D8E3] hover:bg-[#9CC5D3]">
                     Get Started
                   </button>
                   <button className="brutalist-button px-8 py-4 text-lg font-bold bg-[#F7CAC9] hover:bg-[#F0B7B6]">
@@ -487,7 +489,7 @@ export default function Home() {
                   <li>✓ 1GB Resource Storage</li>
                   <li>✓ Community Access</li>
                 </ul>
-                <button className="brutalist-button w-full py-3 bg-white">Get Started</button>
+                <button onClick={() => localStorage.getItem('authToken') ? router.push('/home') : router.push('/signin')} className="brutalist-button w-full py-3 bg-white">Get Started</button>
               </div>
 
               <div className="brutalist-card bg-[#B8D8E3] p-8 transform -translate-y-4">

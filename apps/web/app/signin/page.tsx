@@ -1,7 +1,46 @@
+'use client';
+
 import Link from 'next/link';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
+import { useState } from 'react';
+import axios from 'axios';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from 'jwt-decode';
+import { useRouter } from 'next/navigation';
 
 export default function SignIn() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const router = useRouter();
+
+  if(localStorage.getItem('authToken')){
+    router.push('/home');
+  }
+  const handleSignIn = async () => {
+    try{
+      if(!email || !password){
+        setError('Please fill in all fields');
+        return;
+      }
+      setIsLoading(true);
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/signin`, { email, password });
+      if(response.status === 200){
+        localStorage.setItem('authToken', response.data.token);
+        setIsLoading(false);
+        router.push('/home');
+      }else{
+        setError(response.data.message);
+      }
+      setIsLoading(false);
+    }catch(error){
+      console.error('Sign in error:', error);
+      setError('An error occurred while signing in. Please try again.');
+    }
+  }
+
+
   return (
     <div className="min-h-screen gradient-bg relative">
       <div className="absolute inset-0 pattern-grid opacity-30"></div>
@@ -24,6 +63,8 @@ export default function SignIn() {
                 <input
                   type="email"
                   id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full p-3 border-2 border-gray-800 focus:outline-none focus:border-[#B8D8E3] font-mono"
                   placeholder="you@example.com"
                 />
@@ -36,6 +77,8 @@ export default function SignIn() {
                 <input
                   type="password"
                   id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full p-3 border-2 border-gray-800 focus:outline-none focus:border-[#B8D8E3] font-mono"
                   placeholder="••••••••"
                 />
@@ -59,6 +102,7 @@ export default function SignIn() {
 
               <button
                 type="submit"
+                onClick={handleSignIn}
                 className="brutalist-button w-full py-3 bg-[#FF6B6B] hover:bg-[#FF8C66] text-white font-bold"
               >
                 Sign In
@@ -76,16 +120,19 @@ export default function SignIn() {
               </div>
 
               <div className="mt-6 grid grid-cols-2 gap-4">
-                <button className="brutalist-button w-full py-3 bg-[#FF6B6B] hover:bg-[#FF8C66] text-white font-bold flex items-center justify-center">
-                  <FaGoogle className="mr-2 text-xl" />
-                  Google
-                </button>
+                <GoogleLoginButton />
                 <button className="brutalist-button w-full py-3 bg-[#FF6B6B] hover:bg-[#FF8C66] text-white font-bold flex items-center justify-center">
                   <FaGithub className="mr-2 text-xl" />
                   GitHub
                 </button>
               </div>
             </div>
+            {error && <div className="text-red-500 text-center mt-4">{error}</div>}
+            {isLoading && (
+              <div className="text-center mt-4">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#FF6B6B] border-t-transparent"></div>
+              </div>
+            )}
           </div>
 
           <p className="mt-8 text-center text-sm text-gray-600">
@@ -99,3 +146,37 @@ export default function SignIn() {
     </div>
   );
 }
+
+
+
+const GoogleLoginButton = () => {
+  const router = useRouter()
+  return (
+  <GoogleOAuthProvider  clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID as string}>
+    <GoogleLogin
+      onSuccess={async (credentialResponse) => {
+        if (!credentialResponse.credential) {
+          console.error('No credential received from Google');
+          return;
+        }
+        const decoded = jwtDecode(credentialResponse.credential);
+        console.log("decoded",decoded)
+        try{
+          const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google-signin`,{
+            decoded
+          })
+          const token = response.data.token
+          localStorage.setItem("authToken",token)
+          router.push("/home")
+        }catch(e){
+          console.log(e)
+        }
+        
+        
+      }}
+      onError={() => console.log('Login Failed')}
+    />
+  </GoogleOAuthProvider>
+);
+}
+

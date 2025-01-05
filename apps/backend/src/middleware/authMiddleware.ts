@@ -4,7 +4,9 @@ import { JWT_SECRET } from "../config";
 
 export const authMiddleware = (req: any, res: any, next: NextFunction) => {
    try{
+       console.log("req",req.headers)
        const token = req.headers.authorization?.split(' ')[1];
+       console.log("token",token)
     if (!token) {
         return res.status(401).json({ message: "Unauthorized" });
     }
@@ -13,6 +15,7 @@ export const authMiddleware = (req: any, res: any, next: NextFunction) => {
         username:string,
         email:string
      };
+     console.log("decoded",decoded)
 
      if(!decoded.id || !decoded.username || !decoded.email){
         return res.status(401).json({ message: "Unauthorized" });
