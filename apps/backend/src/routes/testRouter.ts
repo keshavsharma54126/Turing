@@ -22,12 +22,41 @@ testRouter.post("/generate-test", async(req:any, res:any) => {
         urls: urls 
     })
 
-    
-
-
+    const questions = await TestGenerationService.generateInteractiveTest(topic,numQuestions,difficulty as any);
+    await prisma.test.update({
+        where:{id:test.id},
+        data:{
+            title,
+            topic,
+            difficulty,
+            numQuestions,
+            questions:JSON.stringify(questions)
+        }
+    })
 
     return res.status(200).json({test})
    }catch(e){
     return res.status(400).json({message:"Internal server error",error:e})
    }
 });
+
+
+testRouter.get("/get-test/:id", async(req:any, res:any) => {
+    try{
+        const test = await prisma.test.findUnique({where:{id:req.params.id}})
+        if(!test){
+            return res.status(400).json({message:"Test not found"})
+        }
+        return res.status(200).json({test})
+    }catch(e){
+        return res.status(400).json({message:"Internal server error",error:e})
+    }
+})
+
+testRouter.post("/submit-test", async(req:any, res:any) => {
+    try{
+        const parsedBody = testSchema.parse(req.body);
+    }catch(e){
+        return res.status(400).json({message:"Internal server error",error:e})
+    }
+})

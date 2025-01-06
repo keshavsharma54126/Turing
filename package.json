@@ -26,6 +26,8 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.722.0",
     "@aws-sdk/s3-request-presigner": "^3.722.0",
+    "@langchain/community": "^0.3.22",
+    "@langchain/core": "^0.3.27",
     "@types/bcryptjs": "^2.4.6",
     "@types/chart.js": "^2.9.41",
     "@types/cors": "^2.8.17",
@@ -37,6 +39,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
+    "langchain": "^0.3.9",
     "lucide-react": "^0.469.0",
     "react-chartjs-2": "^5.3.0",
     "react-dropzone": "^14.3.5",

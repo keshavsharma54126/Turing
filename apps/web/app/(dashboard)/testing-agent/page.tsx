@@ -1,10 +1,12 @@
 "use client"
 import { useState, useEffect } from 'react';
-import { Upload, Link as LinkIcon, FileText } from 'lucide-react';
+import { Upload, Link as LinkIcon, FileText, Loader2 } from 'lucide-react';
 import axios from 'axios';
 import GeneratedTests from '../../../components/generatedTests';
 import { dummyTests } from '../../../dummyTests';
 import { Dropbox } from '@repo/ui/dropbox';
+import { Router } from 'express';
+import { useRouter } from 'next/navigation';
 
 interface TestInput {
   files: File[];
@@ -72,7 +74,7 @@ const TestingAgent = () => {
   const[topic, setTopic] = useState<string>("");
   const[difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
   const[numQuestions, setNumQuestions] = useState<number>(5);
-
+  const router = useRouter();
 
   const isValidUrl = (url: string) => {
     try{
@@ -115,24 +117,25 @@ const TestingAgent = () => {
   const handleGenerateTest = async () => {
     setIsLoading(true);
     try {
-      const newTest = {
-        id: `test-${generatedTests.length + 1}`,
-        title: topic || "New Test",
-        date: new Date().toISOString().split('T')[0],
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/test/generate-test`,{
+        title: topic,
+        topic: topic,
         difficulty: difficulty,
         numQuestions: numQuestions,
-        topic: topic,
         pdfUrl: pdfUrls,
         urls: urls
-      };
-
-      setGeneratedTests((prev: any) => [newTest, ...prev]);
-      
+      })
+      console.log(response.data);
+      setGeneratedTests((prev: any) => [response.data.test, ...prev]);
+      setGeneratedTest(response.data.test);
+      router.push(`/testing-agent/${response.data.test.id}`);
 
     } catch (error) {
       console.error('Error generating test:', error);
+      
     }
     setIsLoading(false);
+    
   };
   useEffect(()=>{
     const fetchTests = async()=>{
@@ -157,6 +160,12 @@ const TestingAgent = () => {
     fetchTests();
   },[generatedTests]);
 
+
+  if(isLoading){
+    return <div className="flex justify-center items-center h-screen">
+      <Loader2 className="w-10 h-10 animate-spin" />
+    </div>
+  }
 
 
   return (
