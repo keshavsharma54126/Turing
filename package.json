@@ -25,6 +25,7 @@
   ],
   "dependencies": {
     "@types/bcryptjs": "^2.4.6",
+    "@types/chart.js": "^2.9.41",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "axios": "^1.7.9",

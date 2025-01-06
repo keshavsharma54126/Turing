@@ -154,13 +154,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   },[])
 
   return (
-    <div className="flex dashboard-layout max-h-screen dashboard-grid">
+    <div className="flex dashboard-layout h-screen dashboard-grid ">
      <div className='flex flex-col'>
      <Sidebar />
      <Navbar user={user}/>
      </div>
-      <main className="flex-1 justify-center items-center p-6 pt-24 ">
-        <div className="fixed lg:relative first-letter:dashboard-card p-6 dashboard-grid left-0">
+      <main className="flex-1 relative overflow-y-auto h-screen justify-center items-center p-6 pt-24 ">
+        <div className="fixed lg:relative first-letter:dashboard-card sm:p-6 lg:p-0 dashboard-grid left-0">
           {children}
         </div>
       </main>
