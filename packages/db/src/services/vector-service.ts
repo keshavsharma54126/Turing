@@ -52,7 +52,7 @@ export class VectorService {
         `;
     }
 
-    static async searchSimilarResources(query: string, limit = 5, similarityThreshold = 0.8) {
+    static async searchSimilarResources(query: string, limit: number = 5, similarityThreshold: number = 0.8) {
         const queryEmbedding = await this.generateEmbedding(query);
         
         return prisma.$queryRaw`
