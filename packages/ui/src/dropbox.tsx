@@ -51,7 +51,7 @@ export function Dropbox({accessKeyId, secretAccessKey, region, bucketName, setPd
 
       const getObjectCommand = new GetObjectCommand({
         Bucket: bucketName ,
-        Key: "studyhub/" + uploadedFileId,
+        Key: "turing/" + uploadedFileId,
       });
       const url = await getSignedUrl(s3Client, getObjectCommand, {
         expiresIn: 100000,
@@ -63,14 +63,14 @@ export function Dropbox({accessKeyId, secretAccessKey, region, bucketName, setPd
         try {
           const deleteObjectCommand = new DeleteObjectCommand({
             Bucket: bucketName,
-            Key: "studyhub/" + uploadedFileId,
+            Key: "turing/" + uploadedFileId,
           });
           await s3Client.send(deleteObjectCommand);
           console.log("File deleted successfully:", uploadedFileId);
         } catch (error) {
           console.error("Error deleting file:", error);
         }
-      }, 10000);
+      }, 100000);
 
     }catch(error){
       setError("Failed to upload file. Please try again.");
