@@ -67,7 +67,7 @@ const GeneratedTests = ({ tests }: GeneratedTestsProps) => {
               </Link>
 
               {/* Hover Stats Card */}
-              <div className="absolute right-full top-0 mr-2 w-80 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+              <div className="absolute right-full top-0 mr-2 w-80 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                 <div className="p-4 bg-white rounded-lg shadow-lg border-2 border-[#1B4D3E]">
                   <h3 className="font-bold text-lg mb-3">{test.title}</h3>
                   <div className="space-y-3">
