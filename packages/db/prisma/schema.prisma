@@ -53,14 +53,19 @@ model Test {
   id          String   @id @default(cuid())
   userId      String   @map("user_id")
   title       String
-  description String?
-  questions   Json
+  topic       String
+  difficulty  String
+  numQuestions Int
+  pdfUrl      String[]  @map("pdf_url")
+  urls        String[] @map("urls")
+  questions   Json?
+  answers     Json?
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
   user        User     @relation(fields: [userId], references: [id])
   resources   Resource[] @relation("TestResources")
   results     TestResult[]
-
+  isCompleted Boolean @default(false) @map("is_completed")
   @@map("tests")
 }
 
@@ -68,7 +73,11 @@ model TestResult {
   id          String   @id @default(cuid())
   testId      String   @map("test_id")
   userId      String   @map("user_id")
-  result      Json
+  correctAnswers Int
+  incorrectAnswers Int
+  skippedAnswers Int
+  score       Int
+  avgTimePerQuestion Int
   createdAt   DateTime @default(now()) @map("created_at")
   test        Test     @relation(fields: [testId], references: [id])
   user        User     @relation(fields: [userId], references: [id])

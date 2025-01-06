@@ -1,5 +1,5 @@
-import { GeminiService } from "./gemini-service";
-import { VectorService } from "./vector-service";
+import { GeminiService } from "@repo/db/client";
+import { VectorService } from "@repo/db/client";
 import * as pdfjsLib from 'pdfjs-dist';
 import { load } from 'cheerio';
 import axios from 'axios';

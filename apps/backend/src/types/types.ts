@@ -10,3 +10,12 @@ export const signinSchema = z.object({
     email:z.string().email(),
     password:z.string().min(8).max(20),
 })
+
+export const testSchema = z.object({
+    title:z.string().min(3).max(20),
+    topic:z.string().min(3).max(20),
+    difficulty:z.string().min(3).max(20),
+    numQuestions:z.number(),
+    pdfUrl:z.array(z.string()),
+    urls:z.array(z.string())
+})

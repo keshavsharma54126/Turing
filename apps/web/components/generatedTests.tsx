@@ -2,24 +2,31 @@ import Link from 'next/link';
 import { Calendar, Clock, Award, ChevronRight, ChevronLeft, Target, Brain, CheckCircle } from 'lucide-react';
 import { useState } from 'react';
 
-interface GeneratedTest {
-  id: string;
-  title: string;
-  date: string;
-  difficulty: 'easy' | 'medium' | 'hard';
-  numQuestions: number;
-  score?: number;
-  topic: string;
-  performance?: {
-    correct: number;
-    incorrect: number;
-    skipped: number;
-    avgTimePerQuestion?: number;
-  };
+interface Test{
+  id:string;
+  title:string;
+  date:string;
+  difficulty:string;
+  numQuestions:number;
+  topic:string;
+  pdfUrl:string[];
+  urls:string[];
+  questions:any[];
+  isCompleted:boolean;
+  answers:any[];
+  score?:number;
+  performance?:{
+    correct:number;
+    incorrect:number;
+    skipped:number;
+    avgTimePerQuestion?:number;
+  }
+  
 }
 
+
 interface GeneratedTestsProps {
-  tests: GeneratedTest[];
+  tests: Test[];
 }
 
 const GeneratedTests = ({ tests }: GeneratedTestsProps) => {

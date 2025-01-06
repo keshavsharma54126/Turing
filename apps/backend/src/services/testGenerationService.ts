@@ -1,5 +1,5 @@
-import { GeminiService } from "./gemini-service";
-import { VectorService } from "./vector-service";
+import { GeminiService } from "@repo/db/client";
+import { VectorService } from "@repo/db/client";
 
 export class TestGenerationService {
     static async generateInteractiveTest(topic: string, numQuestions: number = 5, difficulty: 'easy' | 'medium' | 'hard' = 'medium') {
@@ -17,7 +17,7 @@ export class TestGenerationService {
             
             const prompt = `
             Based on the following learning content:
-            ${conceptContext.map(c => c.content).join('\n\n')}
+            ${conceptContext.map((c:any) => c.content).join('\n\n')}
 
             Generate a ${difficulty} level interactive question that:
             1. Tests understanding of: ${concept}
