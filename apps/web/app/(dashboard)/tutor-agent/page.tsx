@@ -1,13 +1,20 @@
 "use client"
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
-
+import { useRouter } from 'next/navigation';
 const TutorAgent = () => {
   const [question, setQuestion] = useState('');
   const [context, setContext] = useState('');
   const [response, setResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState<Array<{type: 'user' | 'ai', content: string}>>([]);
+  const router = useRouter();
+
+  useEffect(()=>{
+    if(!localStorage.getItem('authToken')){
+      router.push('/signin');
+    }
+  },[router])
 
   const handleAskQuestion = async () => {
     if (!question.trim()) return;
@@ -16,12 +23,17 @@ const TutorAgent = () => {
     setChatHistory(prev => [...prev, { type: 'user', content: question }]);
 
     try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/conversations/tutor`,
+      let token;
+      if(typeof window !== 'undefined'){
+        token = localStorage.getItem('authToken');
+      }
+
+        const response = await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/conversations/tutor`,
         { question, context },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+            Authorization: `Bearer ${token}}`,
           },
         }
       );

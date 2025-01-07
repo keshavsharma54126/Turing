@@ -29,12 +29,20 @@ const Sidebar = () => {
 
   ];
 
-
+  useEffect(()=>{
+    if(!localStorage.getItem('authToken')){
+      router.push('/signin');
+    }
+  },[router])
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    router.push('/');
+    if(typeof window !== 'undefined'){
+      localStorage.removeItem('authToken');
+      router.push('/');
+    }
   };
+
+
 
   return (
     <>

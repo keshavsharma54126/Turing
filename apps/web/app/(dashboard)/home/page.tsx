@@ -59,15 +59,19 @@ const Home = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        let token;
+        if(typeof window !== 'undefined'){
+          token = localStorage.getItem('authToken');
+        }
         const [testsResponse, statsResponse] = await Promise.all([
           axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/tests/history`, {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+              Authorization: `Bearer ${token}`,
             },
           }),
           axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/stats`, {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+              Authorization: `Bearer ${token}`,
             },
           })
         ]);

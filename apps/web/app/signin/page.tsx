@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
@@ -15,9 +15,12 @@ export default function SignIn() {
   const [password, setPassword] = useState('');
   const router = useRouter();
 
-  if(localStorage.getItem('authToken')){
-    router.push('/home');
-  }
+  useEffect(() => {
+    if (typeof window !== 'undefined' && localStorage.getItem('authToken')) {
+      router.push('/home');
+    }
+  }, [router]);
+
   const handleSignIn = async () => {
     try{
       if(!email || !password){
