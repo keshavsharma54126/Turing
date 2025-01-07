@@ -16,6 +16,7 @@ import {
 } from 'chart.js';
 import axios from 'axios';
 import { Calendar, Brain, GraduationCap, Trophy } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 // Register ChartJS components
 ChartJS.register(
@@ -55,13 +56,16 @@ const Home = () => {
     learningStreak: 0
   });
   const [isLoading, setIsLoading] = useState(true);
-
+  const router = useRouter();
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        let token;
+        let token = '';
         if(typeof window !== 'undefined'){
-          token = localStorage.getItem('authToken');
+          token = localStorage.getItem('authToken')!;
+          if(!token){
+            router.push('/signin');
+          }
         }
         const [testsResponse, statsResponse] = await Promise.all([
           axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/tests/history`, {

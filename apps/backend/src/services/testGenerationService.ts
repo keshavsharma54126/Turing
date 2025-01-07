@@ -48,6 +48,7 @@ export class TestGenerationService {
             3. Includes practical applications or real-world scenarios
             4. Has multiple choice options that are plausible but with only one correct answer
             5. Provides a detailed explanation of why the answer is correct
+            5. Also ask them questions in the same language as the learning content please example: if the content is in english, ask the questions in english,if it was in spanish, ask the questions in spanish , if it was in frech then ask them in french and if it was in hindi then ask them in hindi.
 
             Format as JSON:
             {
@@ -67,35 +68,35 @@ export class TestGenerationService {
             if(count >= numQuestions) break;
 
         }
-        for(const concepts of conceptMap.relatedPairs){
-            const conceptsString = concepts.concepts.join(',');
-            const prompt = `
-            Based on the following learning content:
-            ${conceptsString}
+        // for(const concepts of conceptMap.relatedPairs){
+        //     const conceptsString = concepts.concepts.join(',');
+        //     const prompt = `
+        //     Based on the following learning content:
+        //     ${conceptsString}
 
-            Generate a ${difficulty} level interactive question that:
-            1. Tests understanding of: ${conceptsString}
-            2. Requires critical thinking, not just memorization
-            3. Includes practical applications or real-world scenarios
-            4. Has multiple choice options that are plausible but with only one correct answer
-            5. Provides a detailed explanation of why the answer is correct
+        //     Generate a ${difficulty} level interactive question that:
+        //     1. Tests understanding of: ${conceptsString}
+        //     2. Requires critical thinking, not just memorization
+        //     3. Includes practical applications or real-world scenarios
+        //     4. Has multiple choice options that are plausible but with only one correct answer
+        //     5. Provides a detailed explanation of why the answer is correct
 
-            Format as JSON:
-            {
-                "question": "string",
-                "options": ["string"],
-                "correctAnswer": "string",
-                "explanation": "string",
-                "concept": "string",
-                "difficulty": "string",
-                "type": "string" // e.g., "application", "analysis", "comprehension"
-            }
-            `;
-            const questionResponse = await TestGenerationService.generateQuestion(conceptsString,concepts.relationship,difficulty,prompt);
-            questions.push(JSON.parse(questionResponse));
-            count++;
-            if(count >= numQuestions) break;
-        }
+        //     Format as JSON:
+        //     {
+        //         "question": "string",
+        //         "options": ["string"],
+        //         "correctAnswer": "string",
+        //         "explanation": "string",
+        //         "concept": "string",
+        //         "difficulty": "string",
+        //         "type": "string" // e.g., "application", "analysis", "comprehension"
+        //     }
+        //     `;
+        //     const questionResponse = await TestGenerationService.generateQuestion(conceptsString,concepts.relationship,difficulty,prompt);
+        //     questions.push(JSON.parse(questionResponse));
+        //     count++;
+        //     if(count >= numQuestions) break;
+        // }
         // 4. Order questions for optimal learning
         return TestGenerationService.optimizeQuestionOrder(questions);
     }
@@ -144,7 +145,8 @@ export class TestGenerationService {
         
         const response = await GeminiService.generateResponse(
             formattedPrompt,
-            `You are a helpful assistant that extracts main concepts from given content. Only return concepts that are explicitly present in the text.`
+            `You are a helpful assistant that extracts main concepts from given content. Only return concepts that are explicitly present in the text.and return the concepts in the same language as the content.
+            The content is in language suppose the content was in english then return the concepts in english, if it was in spanish then return the concepts in spanish, if it was in french then return the concepts in french, if it was in hindi then return the concepts in hindi.`
         );
         return conceptMapParser.parse(response);
     }
@@ -183,7 +185,8 @@ export class TestGenerationService {
         2. Test deep understanding rather than surface knowledge
         3. Include real-world applications
         4. Have clearly differentiated multiple choice options
-        5. Match the specified ${difficulty} difficulty level`;
+        5. Match the specified ${difficulty} difficulty level
+        6. Also ask them questions in the same language as the learning content please example: if the content is in english, ask the questions in english,if it was in spanish then ask the questions in spanish , if it was in frech then ask them in french and if it was in hindi then ask them in hindi.`;
 
         const questionParser = StructuredOutputParser.fromZodSchema(
             z.object({
@@ -208,7 +211,7 @@ export class TestGenerationService {
             3. Requires analysis and application
             4. Has clearly distinct multiple choice options
             5. Includes a detailed explanation referencing the context
-
+            6. Also ask them questions in the same language as the learning content please example: if the content is in english, ask the questions in english,if it was in spanish then ask the questions in spanish , if it was in frech then ask them in french and if it was in hindi then ask them in hindi.
             {format_instructions}`,
             inputVariables: ["context", "difficulty", "concept"],
             partialVariables: {

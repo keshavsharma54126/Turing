@@ -144,7 +144,10 @@ const TestingAgent = () => {
   const handleGenerateTest = async () => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem("authToken");
+      let token = "";
+     if(typeof window !== 'undefined'){
+      token = localStorage.getItem("authToken")!;
+     }
       const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/tests/generate-test`,{
         title: topic,
         topic: topic,

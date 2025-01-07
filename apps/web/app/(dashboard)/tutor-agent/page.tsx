@@ -11,7 +11,11 @@ const TutorAgent = () => {
   const router = useRouter();
 
   useEffect(()=>{
-    if(!localStorage.getItem('authToken')){
+    let token = '';
+    if(typeof window !== 'undefined'){
+      token = localStorage.getItem('authToken')!;
+    }
+    if(!token){
       router.push('/signin');
     }
   },[router])

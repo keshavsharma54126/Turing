@@ -1,4 +1,5 @@
 "use client"
+
 import { ReactNode, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Home, TestTube, GraduationCap, Settings, Menu, X, LogOut } from 'lucide-react';
@@ -134,14 +135,15 @@ const Navbar = ({user}:{user:User | null}) => {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [user,setUser] = useState<User | null>(null)
-  const authToken = localStorage.getItem('authToken');
   const router = useRouter();
-  if(!authToken){
-    router.push('/signin')
-  }
+
 
   useEffect(()=>{
-    if(!localStorage.getItem('authToken')){
+    let token = '';
+    if(typeof window !== 'undefined'){
+      token = localStorage.getItem('authToken')!;
+    }
+    if(!token){
       router.push('/signin')
     }
     const fetchUser = async()=>{
