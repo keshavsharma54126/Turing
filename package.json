@@ -41,6 +41,7 @@
     "jsonwebtoken": "^9.0.2",
     "langchain": "^0.3.9",
     "lucide-react": "^0.469.0",
+    "pdf2json": "^3.1.5",
     "react-chartjs-2": "^5.3.0",
     "react-dropzone": "^14.3.5",
     "uuid": "^11.0.4",

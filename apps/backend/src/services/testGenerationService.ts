@@ -26,7 +26,8 @@ export class TestGenerationService {
 
         // 3. Generate questions for each key concept
         const questions = [];
-        for (const concept of conceptMap.mainConcepts) {
+        let count = 0;
+        for (const concept of conceptMap.mainConcepts ) {
             // Get specific context for this concept
             const conceptContext = await VectorService.searchSimilarResources(concept,100,0.8) as any[];
             const conceptContextString = conceptContext.map(c => c.content).join('\n\n');
@@ -55,6 +56,9 @@ export class TestGenerationService {
 
             const questionResponse = await TestGenerationService.generateQuestion(concept,conceptContextString,difficulty,prompt);
             questions.push(JSON.parse(questionResponse));
+            count++;
+            if(count >= numQuestions) break;
+
         }
 
         // 4. Order questions for optimal learning
@@ -127,7 +131,7 @@ export class TestGenerationService {
         return GeminiService.generateResponse(prompt,contextString);
     }
 
-    private static async generateQuestion(concept: string, context: string, difficulty: string,prompt:string) {
+    private static async generateQuestion(concept: string, context: string, difficulty: string, prompt:string) {
         const questionParser = StructuredOutputParser.fromZodSchema(
             z.object({
                 question: z.string(),
@@ -158,8 +162,11 @@ export class TestGenerationService {
             }
         });
 
-        const response = await GeminiService.generateResponse(await questionPrompt.format({ context, difficulty, concept }),prompt);
-        return JSON.parse(response);
+        const response = await GeminiService.generateResponse(await questionPrompt.format({ context, difficulty, concept }), prompt);
+        console.log("response", response);
+        const cleanedResponse = response.replace(/```json\n?|\n?```/g, '').trim();
+        console.log("cleanedResponse", cleanedResponse);
+        return cleanedResponse;
     }
 
     private static async formatTopicForSearch(topic: string): Promise<string> {

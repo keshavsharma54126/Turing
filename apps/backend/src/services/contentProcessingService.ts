@@ -1,10 +1,9 @@
 import { GeminiService } from "@repo/db/client";
 import { VectorService } from "@repo/db/client";
-import * as pdfjsLib from 'pdfjs-dist';
 import { load } from 'cheerio';
 import axios from 'axios';
 import { YoutubeTranscript } from 'youtube-transcript';
-import { userRouter } from "../routes/userRouter";
+import PDFParser from 'pdf2json';
 
 
 export class ContentProcessorService {
@@ -53,28 +52,38 @@ export class ContentProcessorService {
 
     private static async extractFromPDF(url: string) {
         try {
-            // Fetch PDF from URL with proper error handling
+            // Fetch PDF from URL
             const response = await axios.get(url, {
                 responseType: 'arraybuffer',
                 headers: {
                     'Accept': 'application/pdf'
                 }
             });
+
+            // Create a new parser instance
+            const pdfParser = new PDFParser();
+
+            // Convert the PDF to text
+            const pdfText = await new Promise<string>((resolve, reject) => {
+                pdfParser.on('pdfParser_dataReady', (pdfData) => {
+                    const text = pdfData.Pages
+                        .map(page => page.Texts
+                            .map(text => text.R
+                                .map(r => r.T)
+                                .join(' '))
+                            .join(' '))
+                        .join('\n');
+                    resolve(decodeURIComponent(text));
+                });
+                
+                pdfParser.on('pdfParser_dataError', reject);
+                
+                // Load PDF from buffer
+                pdfParser.parseBuffer(response.data);
+            });
+
+            return pdfText.trim();
             
-            // Load PDF document
-            const pdf = await pdfjsLib.getDocument({data: response.data}).promise;
-            let text = '';
-            
-            // Extract text from each page
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const content = await page.getTextContent();
-                text += content.items
-                    .map((item: any) => item.str)
-                    .join(' ');
-            }
-            
-            return text.trim();
         } catch (error) {
             console.error(`Error processing PDF from ${url}:`, error);
             return "";

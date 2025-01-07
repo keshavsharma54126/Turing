@@ -58,8 +58,7 @@ model Test {
   numQuestions Int
   pdfUrl      String[]  @map("pdf_url")
   urls        String[] @map("urls")
-  questions   Json?
-  answers     Json?
+  questions   Json[]
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
   user        User     @relation(fields: [userId], references: [id])
