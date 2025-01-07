@@ -117,13 +117,18 @@ const TestingAgent = () => {
   const handleGenerateTest = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/test/generate-test`,{
+      const token = localStorage.getItem("authToken");
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/tests/generate-test`,{
         title: topic,
         topic: topic,
         difficulty: difficulty,
         numQuestions: numQuestions,
         pdfUrl: pdfUrls,
         urls: urls
+      },{
+        headers:{
+          "Authorization":`Bearer ${token}`
+        }
       })
       console.log(response.data);
       setGeneratedTests((prev: any) => [response.data.test, ...prev]);
@@ -140,7 +145,7 @@ const TestingAgent = () => {
   useEffect(()=>{
     const fetchTests = async()=>{
       try{
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("authToken");
         if(!token){
           return;
         }
@@ -158,7 +163,7 @@ const TestingAgent = () => {
       }
     }
     fetchTests();
-  },[generatedTests]);
+  },[]);
 
 
   if(isLoading){

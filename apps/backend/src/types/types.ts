@@ -12,10 +12,10 @@ export const signinSchema = z.object({
 })
 
 export const testSchema = z.object({
-    title:z.string().min(3).max(20),
-    topic:z.string().min(3).max(20),
+    title:z.string().min(3),
+    topic:z.string().min(3),
     difficulty:z.string().min(3).max(20),
     numQuestions:z.number(),
-    pdfUrl:z.array(z.string()),
-    urls:z.array(z.string())
+    pdfUrl:z.array(z.string()).default([]),
+    urls:z.array(z.string()).default([])
 })

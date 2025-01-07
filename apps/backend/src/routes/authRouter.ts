@@ -60,8 +60,9 @@ authRouter.post("/google-signin", async(req:any, res:any) => {
             email:parsedData.email
           }
         })
+        console.log("user",user)
         if(user){
-          const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET);
+          const token = jwt.sign({ id: user.id, username: user.username, email: user.email }, JWT_SECRET);
           return res.status(200).json({
             token
           })
@@ -72,13 +73,16 @@ authRouter.post("/google-signin", async(req:any, res:any) => {
             username:parsedData.name,
             password:"",
             role:"USER",
-            profileImage:parsedData.picture
+            profileImage:parsedData.picture,
+            googleId:parsedData.sub
           }
         })
+        console.log("newUser",newUser)
         const token = jwt.sign({ id: newUser.id, username: newUser.username, email: newUser.email }, JWT_SECRET);
         return res.status(200).json({
           token
         })
+  
       }catch(e){
         return res.status(400).json({
           message: "invalid data",

@@ -8,7 +8,7 @@ export class TestGenerationService {
     static async generateInteractiveTest(topic: string, numQuestions: number, difficulty: 'easy' | 'medium' | 'hard' = 'medium') {
         let limit;
         limit = numQuestions*20;
-        const formattedTopic = await this.formatTopicForSearch(topic);
+        const formattedTopic = await TestGenerationService.formatTopicForSearch(topic);
         const relevantDocs:any[]=[]
         const formattedKeys = formattedTopic.split(',');
         for(const formattedKey of formattedKeys){
@@ -17,7 +17,7 @@ export class TestGenerationService {
         }
         
         // 2. Generate a concept map to identify key topics
-        const conceptMap = await this.generateConceptMap(relevantDocs);
+        const conceptMap = await TestGenerationService.generateConceptMap(relevantDocs);
 
         // Validate that conceptMap matches our schema
         if (!conceptMap || !Array.isArray(conceptMap.mainConcepts)) {
@@ -53,12 +53,12 @@ export class TestGenerationService {
             }
             `;
 
-            const questionResponse = await this.generateQuestion(concept,conceptContextString,difficulty,prompt);
+            const questionResponse = await TestGenerationService.generateQuestion(concept,conceptContextString,difficulty,prompt);
             questions.push(JSON.parse(questionResponse));
         }
 
         // 4. Order questions for optimal learning
-        return this.optimizeQuestionOrder(questions);
+        return TestGenerationService.optimizeQuestionOrder(questions);
     }
 
     private static async generateConceptMap(contentChunks: any[]) {

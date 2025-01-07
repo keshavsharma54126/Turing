@@ -170,7 +170,7 @@ export function Dropbox({accessKeyId, secretAccessKey, region, bucketName, setPd
 
         {hasUploaded && (
           <button
-            className="bg-teal-500 hover:bg-teal-600 text-white px-6 py-2 rounded-lg transition-colors duration-300 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-green-500 text-black px-6 py-2 rounded-lg transition-colors duration-300 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleSubmit}
             disabled={isLoading || files.length === 0}
           >

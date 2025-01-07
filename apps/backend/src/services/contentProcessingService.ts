@@ -44,10 +44,10 @@ export class ContentProcessorService {
 
     private static async extractType(url: string) {
         if(url.includes("youtube.com")){
-            return this.extractFromVideo(url);
+            return ContentProcessorService.extractFromVideo(url);
         }
         else{
-            return this.extractFromWebsite(url);
+            return ContentProcessorService.extractFromWebsite(url);
         }
     }
 

@@ -16,6 +16,7 @@ export const authMiddleware = (req: any, res: any, next: NextFunction) => {
         email:string
      };
      console.log("decoded",decoded)
+   
 
      if(!decoded.id || !decoded.username || !decoded.email){
         return res.status(401).json({ message: "Unauthorized" });
@@ -23,6 +24,7 @@ export const authMiddleware = (req: any, res: any, next: NextFunction) => {
      req.userId = decoded.id;
      req.username = decoded.username;
      req.email = decoded.email;
+
     
     next();
    }catch(error){

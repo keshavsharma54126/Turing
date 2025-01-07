@@ -1,47 +1,73 @@
 import Router from "express";
-import { prisma,VectorService, GeminiService } from "@repo/db/client";
+import { prisma,VectorService, GeminiService, Prisma } from "@repo/db/client";
 import { testSchema } from "../types/types";
 import { ContentProcessorService } from "../services/contentProcessingService";
 import { TestGenerationService } from "../services/testGenerationService";
-import { Trophy } from "lucide-react";
+import { authMiddleware } from "../middleware/authMiddleware";
 export const testRouter = Router();
 
-testRouter.post("/generate-test", async(req:any, res:any) => {
-   try{
-    const parsedBody = testSchema.parse(req.body);
-    if(!parsedBody){
-        return res.status(400).json({message:"Invalid request body"})
-    }
-    const {title, topic, difficulty, numQuestions, pdfUrl, urls} = parsedBody;
-    const test = await prisma.test.create({data:{title, topic, difficulty, numQuestions, pdfUrl, urls, userId:req.userId}})
-
-    await ContentProcessorService.processContent({
-        userId: req.userId,
-        testId: test.id,
-        pdfUrls: pdfUrl ,
-        urls: urls 
-    })
-
-    const questions = await TestGenerationService.generateInteractiveTest(topic,numQuestions,difficulty as any);
-    await prisma.test.update({
-        where:{id:test.id},
-        data:{
-            title,
-            topic,
-            difficulty,
-            numQuestions,
-            questions:JSON.stringify(questions)
+testRouter.post("/generate-test", authMiddleware, async(req:any, res:any) => {
+   try {
+        if (!req.userId) {
+            return res.status(401).json({ message: "Unauthorized - User ID not found" });
         }
-    })
 
-    return res.status(200).json({test})
-   }catch(e){
-    return res.status(400).json({message:"Internal server error",error:e})
+        const parsedBody = testSchema.parse(req.body);
+        console.log("Parsed body:", parsedBody);
+
+        const {title, topic, difficulty, numQuestions, pdfUrl, urls} = parsedBody;
+        const pdfUrlArray = Array.isArray(pdfUrl) ? pdfUrl : [];
+        const urlsArray = Array.isArray(urls) ? urls : [];
+        
+        const test = await prisma.test.create({
+            data: {
+                title, 
+                topic, 
+                difficulty, 
+                numQuestions, 
+                pdfUrl: pdfUrlArray,
+                urls: urlsArray,
+                userId: req.userId,
+                isCompleted: false,
+                questions: Prisma.JsonNull,
+                answers: Prisma.JsonNull
+            }
+        });
+
+        console.log("Test created:", test);
+
+        await ContentProcessorService.processContent({
+            userId: req.userId,
+            testId: test.id,
+            pdfUrls: pdfUrl ,
+            urls: urls 
+        })
+        console.log("Content processed");
+        const questions = await TestGenerationService.generateInteractiveTest(topic,numQuestions,difficulty as any);
+        await prisma.test.update({
+            where:{id:test.id},
+            data:{
+                title,
+                topic,
+                difficulty,
+                numQuestions,
+                questions:JSON.stringify(questions)
+            }
+        })
+        console.log("Test created");
+        return res.status(200).json({test})
+   } catch(e) {
+        console.error("Detailed error:", e);
+        return res.status(400).json({
+            message: "Internal server error",
+            error: e,
+            details: e instanceof Error ? e.message : "Unknown error"
+        });
    }
 });
 
 
-testRouter.get("/get-test/:id", async(req:any, res:any) => {
+testRouter.get("/get-test/:id", authMiddleware, async(req:any, res:any) => {
     try{
         const test = await prisma.test.findUnique({where:{id:req.params.id}})
         if(!test){
@@ -53,7 +79,7 @@ testRouter.get("/get-test/:id", async(req:any, res:any) => {
     }
 })
 
-testRouter.post("/submit-test", async(req:any, res:any) => {
+testRouter.post("/submit-test", authMiddleware, async(req:any, res:any) => {
     try{
         const parsedBody = testSchema.parse(req.body);
     }catch(e){
