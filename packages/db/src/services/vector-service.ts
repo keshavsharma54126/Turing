@@ -1,5 +1,5 @@
 import { prisma } from '../index';
-import type { Prisma} from '@prisma/client';
+import { Prisma} from '@prisma/client';
 import { GeminiService } from './gemini-service';
 import { randomUUID } from 'crypto';
 
@@ -52,7 +52,7 @@ export class VectorService {
         `;
     }
 
-    static async searchSimilarResources(query: string, limit: number = 5, similarityThreshold: number = 0.8) {
+    static async searchSimilarResources(query: string, limit: number = 5, similarityThreshold: number = 0.8, testId?: string) {
         const queryEmbedding = await this.generateEmbedding(query);
         
         return prisma.$queryRaw`
@@ -66,6 +66,7 @@ export class VectorService {
                 1 - (embedding <=> ${queryEmbedding}::vector) as similarity
             FROM resources
             WHERE 1 - (embedding <=> ${queryEmbedding}::vector) >= ${similarityThreshold}
+                ${testId ? Prisma.sql`AND test_id = ${testId}` : Prisma.sql``}
             ORDER BY embedding <=> ${queryEmbedding}::vector
             LIMIT ${limit};
         `;

@@ -16,11 +16,11 @@ export class GeminiService {
 
     static async generateResponse(text: string, systemInstruction: string) {
         const model = geminiClient.getGenerativeModel({
-            model: "gemini-1.5-flash",
+            model: "gemini-1.5-pro",
             generationConfig: {
-                temperature: 0.7,
+                temperature: 0.3,
                 topP: 0.95,
-                topK: 40
+                topK: 40,
             },
             systemInstruction: systemInstruction
         });

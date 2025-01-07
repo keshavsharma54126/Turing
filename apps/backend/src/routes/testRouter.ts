@@ -41,7 +41,7 @@ testRouter.post("/generate-test", authMiddleware, async(req:any, res:any) => {
             urls: urls 
         })
         console.log(contentProcessingResult);
-        const questions = await TestGenerationService.generateInteractiveTest(topic,numQuestions,difficulty as any);
+        const questions = await TestGenerationService.generateInteractiveTest(topic,numQuestions,difficulty as any,test.id);
         await prisma.test.update({
             where:{id:test.id},
             data:{
