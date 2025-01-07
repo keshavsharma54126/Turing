@@ -52,6 +52,22 @@ interface GeneratedTest {
   };
 }
 
+const studyTips = [
+  "Break your study sessions into 25-minute chunks (Pomodoro Technique)",
+  "Try teaching the concept to someone else to master it",
+  "Create mind maps to connect different topics",
+  "Take short breaks every hour to maintain focus",
+  "Review your notes before going to bed for better retention",
+];
+
+const motivationalQuotes = [
+  "The expert in anything was once a beginner. — Helen Hayes",
+  "The beautiful thing about learning is that no one can take it away from you. — B.B. King",
+  "Education is not preparation for life; education is life itself — John Dewey",
+  "The more that you read, the more things you will know. — Dr. Seuss",
+  "Success is not final, failure is not fatal. It is the courage to continue that counts. — Winston Churchill",
+];
+
 const TestingAgent = () => {
   const [testInput, setTestInput] = useState<TestInput>({
     files: [],
@@ -65,8 +81,6 @@ const TestingAgent = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [generatedTests, setGeneratedTests] = useState(dummyTests);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
-  const [followUpQuestions, setFollowUpQuestions] = useState<Record<number, any>>({});
   const [pdfUrls, setPdfUrls] = useState<string[]>([]);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const[referenceLinks, setReferenceLinks] = useState<string>();
@@ -75,6 +89,19 @@ const TestingAgent = () => {
   const[difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");
   const[numQuestions, setNumQuestions] = useState<number>(5);
   const router = useRouter();
+  const [currentTipIndex, setCurrentTipIndex] = useState(0);
+  const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
+
+  useEffect(() => {
+    if (isLoading) {
+      const interval = setInterval(() => {
+        setCurrentTipIndex(prev => (prev + 1) % studyTips.length);
+        setCurrentQuoteIndex(prev => (prev + 1) % motivationalQuotes.length);
+      }, 5000); // Change every 5 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [isLoading]);
 
   const isValidUrl = (url: string) => {
     try{
@@ -133,7 +160,7 @@ const TestingAgent = () => {
       console.log(response.data);
       setGeneratedTests((prev: any) => [response.data.test, ...prev]);
       setGeneratedTest(response.data.test);
-      router.push(`/testing-agent/${response.data.test.id}`);
+      router.push(`/test/${response.data.test.id}`);
 
     } catch (error) {
       console.error('Error generating test:', error);
@@ -142,34 +169,45 @@ const TestingAgent = () => {
     setIsLoading(false);
     
   };
-  useEffect(()=>{
-    const fetchTests = async()=>{
-      try{
-        const token = localStorage.getItem("authToken");
-        if(!token){
-          return;
-        }
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/tests`,
-          {
-            headers:{
-              "Authorization":`Bearer ${token}`
-            }
-          }
-        );
-        setGeneratedTests(response.data.tests);
-      }catch(error){
-        console.error("Error fetching tests",error);
-      }
-    }
-    fetchTests();
-  },[]);
 
 
   if(isLoading){
-    return <div className="flex justify-center items-center h-screen">
-      <Loader2 className="w-10 h-10 animate-spin" />
-    </div>
+    return (
+      <div className="flex flex-col justify-center items-center min-h-screen bg-gradient-to-b from-[#1B4D3E] to-[#2C7A7B] text-white p-6">
+        <div className="max-w-2xl w-full space-y-8 text-center">
+          {/* Loading Animation */}
+          <div className="relative">
+            <Loader2 className="w-16 h-16 animate-spin mx-auto" />
+            <div className="mt-4 text-xl font-semibold">
+              Preparing Your Perfect Study Materials...
+            </div>
+          </div>
+
+          {/* Progress Animation */}
+          <div className="w-full bg-white/20 rounded-full h-2 mb-8">
+            <div className="bg-white h-2 rounded-full animate-progress"></div>
+          </div>
+
+          {/* Motivational Quote */}
+          <div className="space-y-4 transition-opacity duration-500 animate-fade-in">
+            <blockquote className="text-2xl font-serif italic">
+              {motivationalQuotes[currentQuoteIndex]}
+            </blockquote>
+          </div>
+
+          {/* Study Tip */}
+          <div className="mt-8 p-6 bg-white/10 rounded-lg backdrop-blur-sm transition-opacity duration-500 animate-fade-in">
+            <h3 className="text-lg font-semibold mb-2">💡 Quick Study Tip:</h3>
+            <p className="text-md">{studyTips[currentTipIndex]}</p>
+          </div>
+
+          {/* Loading Message */}
+          <div className="text-sm text-white/80 animate-pulse">
+            Creating personalized questions based on your materials...
+          </div>
+        </div>
+      </div>
+    );
   }
 
 
@@ -292,14 +330,14 @@ const TestingAgent = () => {
 
         {/* Generated Test Display */}
         {generatedTest && (
-          <div className="brutalist-card bg-white p-6 mb-8">
+          <div className="brutalist-card bg-white p-6 mb-8 max-w-4xl mx-auto">
             <div className="mb-4">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-bold">
                   Question {currentQuestionIndex + 1} of {generatedTest.questions.length}
                 </h2>
                 <span className="font-mono text-sm">
-                  Topic: {generatedTest.questions[currentQuestionIndex].concept}
+                  Topic: {generatedTest.topic}
                 </span>
               </div>
               <div className="h-2 bg-gray-200 rounded">
@@ -333,7 +371,7 @@ const TestingAgent = () => {
           </div>
         )}
       </div>
-      <GeneratedTests tests={generatedTests as Test[]} />
+      <GeneratedTests  />
     </div>
   );
 };

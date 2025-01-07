@@ -12,6 +12,12 @@ declare module 'pdf2json' {
     }
 
     class PDFParser {
+        loadBuffer(data: any) {
+            throw new Error("Method not implemented.");
+        }
+        getRawTextContent() {
+            throw new Error("Method not implemented.");
+        }
         constructor();
         on(event: 'pdfParser_dataReady', callback: (pdfData: PDFData) => void): void;
         on(event: 'pdfParser_dataError', callback: (error: Error) => void): void;

@@ -29,20 +29,18 @@ testRouter.post("/generate-test", authMiddleware, async(req:any, res:any) => {
                 urls: urlsArray,
                 userId: req.userId,
                 isCompleted: false,
-                questions: Prisma.JsonNull,
-                answers: Prisma.JsonNull
             }
         });
 
         console.log("Test created:", test);
 
-        await ContentProcessorService.processContent({
+       const contentProcessingResult = await ContentProcessorService.processContent({
             userId: req.userId,
             testId: test.id,
             pdfUrls: pdfUrl ,
             urls: urls 
         })
-        console.log("Content processed");
+        console.log(contentProcessingResult);
         const questions = await TestGenerationService.generateInteractiveTest(topic,numQuestions,difficulty as any);
         await prisma.test.update({
             where:{id:test.id},
@@ -51,7 +49,7 @@ testRouter.post("/generate-test", authMiddleware, async(req:any, res:any) => {
                 topic,
                 difficulty,
                 numQuestions,
-                questions:JSON.stringify(questions)
+                questions
             }
         })
         console.log("Test created");
@@ -69,11 +67,27 @@ testRouter.post("/generate-test", authMiddleware, async(req:any, res:any) => {
 
 testRouter.get("/get-test/:id", authMiddleware, async(req:any, res:any) => {
     try{
-        const test = await prisma.test.findUnique({where:{id:req.params.id}})
+        const testId = req.params.id;
+        const test = await prisma.test.findUnique({where:{id:testId}})
+        console.log(test);
+
         if(!test){
             return res.status(400).json({message:"Test not found"})
         }
         return res.status(200).json({test})
+    }catch(e){
+        return res.status(400).json({message:"Internal server error",error:e})
+    }
+})
+
+testRouter.delete("/delete-test/:id", authMiddleware, async(req:any, res:any) => {
+    try{
+        const testId = req.params.id;
+        const test = await prisma.test.delete({where:{id:testId}})
+        if(!test){
+            return res.status(400).json({message:"Test not found"})
+        }
+        return res.status(200).json({message:"Test deleted",test})
     }catch(e){
         return res.status(400).json({message:"Internal server error",error:e})
     }
@@ -86,3 +100,4 @@ testRouter.post("/submit-test", authMiddleware, async(req:any, res:any) => {
         return res.status(400).json({message:"Internal server error",error:e})
     }
 })
+

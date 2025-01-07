@@ -51,7 +51,7 @@ const Sidebar = () => {
       <div
         className={`${
           isOpen ? 'translate-x-0' : '-translate-x-full'
-        } lg:translate-x-0 transition-transform duration-300 w-64 h-screen bg-[#1B4D3E] text-white fixed left-0 top-0 p-4 z-40 inset-0 dashboard-card`}
+        } lg:translate-x-0 transition-transform duration-300 w-64 h-screen bg-[#eaecec] text-white fixed left-0 top-0 p-4 z-40 inset-0 dashboard-card`}
       >
         <div className="mb-8 pt-4">
           <h1 className="text-2xl font-bold text-[#2A6B5D] text-center">TURING AI</h1>
@@ -61,7 +61,7 @@ const Sidebar = () => {
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-center gap-3 p-3 rounded hover:bg-[#3E8E7E] transition-colors dashboard-button mb-2 bg-[#1B4D3E] text-white"
+              className="flex items-center gap-3 p-3 rounded hover:bg-[#42bba3] transition-colors dashboard-button mb-2 bg-[#31a783] text-white"
               onClick={() => setIsOpen(false)}
             >
               {item.icon}

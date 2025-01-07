@@ -5,6 +5,10 @@ import axios from 'axios';
 import { YoutubeTranscript } from 'youtube-transcript';
 import PDFParser from 'pdf2json';
 
+interface PDFExtractResult {
+    text: string;
+    pageCount: number;
+}
 
 export class ContentProcessorService {
     static async processContent(content: {
@@ -50,43 +54,50 @@ export class ContentProcessorService {
         }
     }
 
-    private static async extractFromPDF(url: string) {
+    private static async extractFromPDF(url: string): Promise<PDFExtractResult> {
         try {
             // Fetch PDF from URL
             const response = await axios.get(url, {
-                responseType: 'arraybuffer',
-                headers: {
-                    'Accept': 'application/pdf'
-                }
+                responseType: 'arraybuffer'
             });
 
             // Create a new parser instance
             const pdfParser = new PDFParser();
 
             // Convert the PDF to text
-            const pdfText = await new Promise<string>((resolve, reject) => {
+            const result = await new Promise<PDFExtractResult>((resolve, reject) => {
                 pdfParser.on('pdfParser_dataReady', (pdfData) => {
-                    const text = pdfData.Pages
-                        .map(page => page.Texts
-                            .map(text => text.R
-                                .map(r => r.T)
-                                .join(' '))
-                            .join(' '))
-                        .join('\n');
-                    resolve(decodeURIComponent(text));
+                    try {
+                        // Extract text from all pages
+                        const text = pdfData.Pages.map(page => {
+                            return page.Texts.map(text => 
+                                decodeURIComponent(text.R[0].T)
+                            ).join(' ');
+                        }).join('\n\n');
+
+                        resolve({
+                            text,
+                            pageCount: pdfData.Pages.length
+                        });
+                    } catch (err) {
+                        reject(err);
+                    }
                 });
-                
-                pdfParser.on('pdfParser_dataError', reject);
-                
-                // Load PDF from buffer
+
+                pdfParser.on('pdfParser_dataError', (error: any) => {
+                    reject(error);
+                });
+
+                // Load the PDF data
                 pdfParser.parseBuffer(response.data);
             });
 
-            return pdfText.trim();
-            
+            console.log(result);
+            return result;
+
         } catch (error) {
             console.error(`Error processing PDF from ${url}:`, error);
-            return "";
+            throw error;
         }
     }
 

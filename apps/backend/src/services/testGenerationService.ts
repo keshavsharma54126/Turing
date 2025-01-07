@@ -12,12 +12,14 @@ export class TestGenerationService {
         const relevantDocs:any[]=[]
         const formattedKeys = formattedTopic.split(',');
         for(const formattedKey of formattedKeys){
-            const relevantSearch = await VectorService.searchSimilarResources(formattedKey,limit,0.8) as any[];
+            const relevantSearch = await VectorService.searchSimilarResources(formattedKey,limit,0.7) as any[];
             relevantDocs.push(...relevantSearch);
         }
-        
+        console.log(formattedKeys);
         // 2. Generate a concept map to identify key topics
         const conceptMap = await TestGenerationService.generateConceptMap(relevantDocs);
+
+        console.log(conceptMap);
 
         // Validate that conceptMap matches our schema
         if (!conceptMap || !Array.isArray(conceptMap.mainConcepts)) {
@@ -82,8 +84,7 @@ export class TestGenerationService {
             template: `Analyze this content and identify:
                 1. Main concepts that should be tested
                 2. Relationships between concepts
-                3. Progressive learning order
-                4. Make sure you check your knowledge base also for the concepts that are important to the topicand relationships between them.
+                3. Progressive learning order.
                 
                 {format_instructions}
                 
@@ -126,7 +127,7 @@ export class TestGenerationService {
             '1. Reinforces the same concept from a different angle\n2. Provides more context in the question'
         }
         `;
-        const context = await VectorService.searchSimilarResources(previousQuestion.concept,100,0.8) as any[];
+        const context = await VectorService.searchSimilarResources(previousQuestion.concept,20,0.7) as any[];
         const contextString = context.map((c:any) => c.content).join('\n');
         return GeminiService.generateResponse(prompt,contextString);
     }

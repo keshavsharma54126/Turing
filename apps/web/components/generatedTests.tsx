@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { Calendar, Clock, Award, ChevronRight, ChevronLeft, Target, Brain, CheckCircle } from 'lucide-react';
-import { useState } from 'react';
+import { Calendar, Clock, Award, ChevronRight, ChevronLeft, Target, Brain, CheckCircle, Delete, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 interface Test{
   id:string;
@@ -15,6 +16,7 @@ interface Test{
   isCompleted:boolean;
   answers:any[];
   score?:number;
+  createdAt:string;
   performance?:{
     correct:number;
     incorrect:number;
@@ -29,8 +31,51 @@ interface GeneratedTestsProps {
   tests: Test[];
 }
 
-const GeneratedTests = ({ tests }: GeneratedTestsProps) => {
+const GeneratedTests = () => {
   const [isExpanded, setIsExpanded] = useState(true);
+  const [generatedTests, setGeneratedTests] = useState<Test[]>([]);
+
+  useEffect(()=>{
+    const fetchTests = async()=>{
+      try{
+        const token = localStorage.getItem("authToken");
+        if(!token){
+          return;
+        }
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/tests`,
+          {
+            headers:{
+              "Authorization":`Bearer ${token}`
+            }
+          }
+        );
+        setGeneratedTests(response.data.tests);
+      }catch(error){
+        console.error("Error fetching tests",error);
+      }
+    }
+    fetchTests();
+  },[]);
+
+  const handleDelete = async(testId:string)=>{
+    try{
+      const token = localStorage.getItem("authToken");
+      if(!token){
+        return;
+      }
+      const response = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/tests/delete-test/${testId}`,{
+        headers:{
+          "Authorization":`Bearer ${token}`
+        }
+      });
+      setGeneratedTests(generatedTests.filter((test)=>test.id !== testId));
+    }catch(error){
+      console.error("Error deleting test",error);
+     
+    }
+  }
+
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -56,22 +101,29 @@ const GeneratedTests = ({ tests }: GeneratedTestsProps) => {
         </div>
         
         <div className="space-y-1 overflow-y-auto max-h-[calc(100vh-8rem)]">
-          {tests.map((test) => (
+          {generatedTests.map((test) => (
             <div key={test.id} className="group relative">
-              <Link 
-                href={`/test/${test.id}`}
-                key={test.id}
-                className="block p-3 hover:bg-gray-100 transition-colors"
-                prefetch={false}
-              >
-                <h3 className="font-medium truncate mb-1">{test.title}</h3>
-                <div className="flex items-center justify-between text-sm text-gray-500">
-                  <span>{new Date(test.date).toLocaleDateString()}</span>
-                  <span className={`px-2 py-0.5 rounded-full text-xs ${getDifficultyColor(test.difficulty)}`}>
-                    {test.difficulty}
-                  </span>
-                </div>
-              </Link>
+              <div>
+                <Link 
+                  href={`/test/${test.id}`}
+                  key={test.id}
+                  className="block p-3 hover:bg-gray-100 transition-colors"
+                  prefetch={false}
+                >
+                  <h3 className="font-medium truncate mb-1">{test.title}</h3>
+                  <div className="flex items-center justify-between text-sm text-gray-500">
+                    <span>{new Date(test.createdAt).toLocaleDateString()}</span>
+                    <span className={`px-2 py-0.5 rounded-full text-xs ${getDifficultyColor(test.difficulty)}`}>
+                      {test.difficulty}
+                    </span>
+                  </div>
+                  
+                </Link>
+                <button onClick={()=>handleDelete(test.id)} className="absolute top-0 right-0 text-[#1B4D3E] hover:text-[#2A6B5D] transition-colors">
+                  <Trash2 size={30} className="cursor-pointer text-red-500 hover:text-red-600" />
+                </button>
+              </div>
+              
 
               {/* Hover Stats Card */}
               <div className="absolute right-full top-0 mr-2 w-80 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
