@@ -64,7 +64,7 @@ model Test {
   updatedAt   DateTime @updatedAt @map("updated_at")
   user        User     @relation(fields: [userId], references: [id])
   resources   Resource[] @relation("TestResources")
-  results     TestResult[]
+  results     TestResult[] @relation("TestResults")
   isCompleted Boolean @default(false) @map("is_completed")
   @@map("tests")
 }
@@ -80,7 +80,7 @@ model TestResult {
   incorrectAnswers Int
   skippedAnswers Int
   createdAt   DateTime @default(now()) @map("created_at")
-  test        Test     @relation(fields: [testId], references: [id])
+  test        Test     @relation("TestResults", fields: [testId], references: [id],onDelete:Cascade)
   user        User     @relation(fields: [userId], references: [id])
 
   @@map("test_results")

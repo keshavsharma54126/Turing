@@ -71,11 +71,10 @@ const TestPage = () => {
           'Authorization': `Bearer ${token}`
         }
       })
-      console.log(testResults.data.testResults.userAnswers)
       setUserAnswers(testResults.data.testResults.userAnswers)
     }
-    
-    evaluateTest()
+        evaluateTest()
+      
   },[isSubmitted])
 
   const handleSubmitTest = async () => {

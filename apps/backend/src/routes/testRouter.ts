@@ -105,11 +105,15 @@ testRouter.get("/get-test/:id", authMiddleware, async(req:any, res:any) => {
 
 testRouter.delete("/delete-test/:id", authMiddleware, async(req:any, res:any) => {
     try{
+        console.log("Deleting test")
         const testId = req.params.id;
-        const test = await prisma.test.delete({where:{id:testId}})
+        console.log(testId)
+        const test = await prisma.test.deleteMany({where:{id:testId}})
+        console.log(test)
         if(!test){
             return res.status(400).json({message:"Test not found"})
         }
+        console.log("Test deleted")
         return res.status(200).json({message:"Test deleted",test})
     }catch(e){
         return res.status(400).json({message:"Internal server error",error:e})

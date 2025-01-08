@@ -26,11 +26,6 @@ interface Test{
   
 }
 
-
-interface GeneratedTestsProps {
-  tests: Test[];
-}
-
 const GeneratedTests = () => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [generatedTests, setGeneratedTests] = useState<Test[]>([]);
@@ -60,9 +55,9 @@ const GeneratedTests = () => {
 
   const handleDelete = async(testId:string)=>{
     try{
-      const token = localStorage.getItem("authToken");
-      if(!token){
-        return;
+      let token=''
+      if(typeof window !== 'undefined'){
+        token = localStorage.getItem("authToken") || '';
       }
       const response = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/tests/delete-test/${testId}`,{
         headers:{
