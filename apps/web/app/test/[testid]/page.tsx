@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import axios from 'axios';
 
 interface UserAnswers {
-  [key: number]: string
+  [key: number]: string | undefined
 }
 
 const TestPage = () => {
@@ -33,9 +33,9 @@ const TestPage = () => {
           'Authorization': `Bearer ${token}`
         }
       });
-      console.log(test.data.test)
       setTest(test.data.test);
       setLoading(false);
+      setIsSubmitted(test.data.test.isSubmitted)
 
     };
  
@@ -57,13 +57,12 @@ const TestPage = () => {
           'Authorization': `Bearer ${token}`
         }
       })
-      console.log(response.data.test)
       setTest(response.data.test)
       setScore(response.data.score)
       setCorrectAnswers(response.data.correctAnswers)
       setIncorrectAnswers(response.data.incorrectAnswers)
       setSkippedAnswers(response.data.skippedAnswers)
-      setIsSubmitted(true)
+      setIsSubmitted(response.data.isSubmitted)
       setAnsweredQuestions(Object.keys(userAnswers).length)
       // setUserAnswers(response.data.userAnswers)
       const testResults = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/tests/get-test-results/${testId}`,{
@@ -71,7 +70,9 @@ const TestPage = () => {
           'Authorization': `Bearer ${token}`
         }
       })
-      setUserAnswers(testResults.data.testResults.userAnswers)
+      if(testResults.data.testResults){
+        setUserAnswers(testResults.data.testResults.userAnswers)
+      }
     }
         evaluateTest()
       
@@ -92,41 +93,58 @@ const TestPage = () => {
       }
     })
     setTest(response.data.test)
-    await evaluateAnswers(userAnswers,test.questions)
-    setLoading(false)
-    setIsSubmitted(true)
-    setCorrectAnswers(score)
-    setIncorrectAnswers(test.questions.length-score)
-    setSkippedAnswers(test.questions.length-Object.keys(userAnswers).length)
+     const {newScore,newCorrectAnswers,totalQuestions,totalAnsweredQuestions} = await evaluateAnswers(userAnswers,test.questions)
+     setScore(newScore)
+     setCorrectAnswers(newCorrectAnswers)
+     setIncorrectAnswers(totalQuestions-newCorrectAnswers)
+     setSkippedAnswers(totalAnsweredQuestions-Object.keys(userAnswers).length)
 
-    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/tests/submit-test`,{
-      testId,
-      userAnswers,
-      score,
-      isCompleted:true,
-      isSubmitted:true,
-      correctAnswers,
-      incorrectAnswers,
-      skippedAnswers
-    },{
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/tests/submit-test`,{
+        testId,
+        userAnswers,
+        score:newScore,
+        isCompleted:true,
+        isSubmitted:true,
+        correctAnswers:newCorrectAnswers,
+        incorrectAnswers:totalQuestions-newCorrectAnswers,
+        skippedAnswers:totalAnsweredQuestions-Object.keys(userAnswers).length
+      },{
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+       setLoading(false)
+       setIsSubmitted(true)
+       window.location.reload()
+       
   }
 
   const evaluateAnswers = async(userAnswers:UserAnswers,questions:any)=>{
+    let newScore = 0;
+    let newCorrectAnswers = 0;
+    const userAnswersArray = Object.values(userAnswers)
+    let totalQuestions = questions.length
+    let totalAnsweredQuestions = Object.keys(userAnswers).length
+    console.log(userAnswersArray)
      for(let i=0;i<questions.length;i++){
-        if(userAnswers[i] === questions[i].correctAnswer){
-            setScore(prev=>prev+1)
+      
+        if(userAnswersArray[i]?.trim() === questions[i].correctAnswer?.trim()){
+          console.log(userAnswersArray[i].trim(),questions[i].correctAnswer.trim())
+            newScore+=10
+            newCorrectAnswers+=1
         }
      }
+     console.log(score)
      setUserAnswers((prev:any)=>({...prev,}))
      setIsSubmitted(true)
-     setCorrectAnswers(score)
-     setIncorrectAnswers(questions.length-score)
+     setCorrectAnswers(correctAnswers)
+     setIncorrectAnswers(questions.length-correctAnswers)
      setSkippedAnswers(questions.length-Object.keys(userAnswers).length)
      setAnsweredQuestions(Object.keys(userAnswers).length)
+
+
+     return {newScore,newCorrectAnswers,totalQuestions,totalAnsweredQuestions}
+
      
   }
 

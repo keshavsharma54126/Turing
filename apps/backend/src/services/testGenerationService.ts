@@ -60,6 +60,8 @@ export class TestGenerationService {
                 "difficulty": "string",
                 "type": "string" // e.g., "application", "analysis", "comprehension"
             }
+
+            Please make sure that the correct answer is fully stored in the correctAnswer field and not just the first part of the option.or like "A","B","C","D" etc.
             `;
 
             const questionResponse = await TestGenerationService.generateQuestion(keys,conceptContextString,difficulty,prompt);
@@ -212,6 +214,8 @@ export class TestGenerationService {
             4. Has clearly distinct multiple choice options
             5. Includes a detailed explanation referencing the context
             6. Also ask them questions in the same language as the learning content please example: if the content is in english, ask the questions in english,if it was in spanish then ask the questions in spanish , if it was in frech then ask them in french and if it was in hindi then ask them in hindi.
+            7. Please make sure that the correct answer is fully stored in the correctAnswer field and not just the first part of the option.or like "A","B","C","D" etc.
+            8. Please make sure that the options are fully stored in the options field and not just the first part of the option.or like "A","B","C","D" etc.
             {format_instructions}`,
             inputVariables: ["context", "difficulty", "concept"],
             partialVariables: {
