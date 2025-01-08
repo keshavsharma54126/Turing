@@ -1,6 +1,6 @@
 import Router from "express";
 import { prisma,VectorService, GeminiService, Prisma } from "@repo/db/client";
-import { testSchema } from "../types/types";
+import { evaluateTestSchema, submitTestSchema, testSchema } from "../types/types";
 import { ContentProcessorService } from "../services/contentProcessingService";
 import { TestGenerationService } from "../services/testGenerationService";
 import { authMiddleware } from "../middleware/authMiddleware";
@@ -68,12 +68,35 @@ testRouter.post("/generate-test", authMiddleware, async(req:any, res:any) => {
 testRouter.get("/get-test/:id", authMiddleware, async(req:any, res:any) => {
     try{
         const testId = req.params.id;
-        const test = await prisma.test.findUnique({where:{id:testId}})
-        console.log(test);
+        const test = await prisma.test.findUnique({
+            where:{id:testId},
+            select:{
+                id:true,
+                userId:true,
+                topic:true,
+                title:true,
+                difficulty:true,
+                numQuestions:true,
+                pdfUrl:true,
+                urls:true,
+                questions:true,
+                isCompleted:true,
+            }
+        })
 
         if(!test){
             return res.status(400).json({message:"Test not found"})
         }
+        const filteredQuestions = test.questions.map((question:any)=>{
+            return {
+                question:question.question,
+                options:question.options,
+                concept:question.concept,
+                difficulty:question.difficulty,
+                type:question.type
+            }
+        })
+        test.questions =filteredQuestions
         return res.status(200).json({test})
     }catch(e){
         return res.status(400).json({message:"Internal server error",error:e})
@@ -93,9 +116,84 @@ testRouter.delete("/delete-test/:id", authMiddleware, async(req:any, res:any) =>
     }
 })
 
+testRouter.post("/evaluate-test", authMiddleware, async(req:any, res:any) => {
+    try{
+        const parsedBody = await evaluateTestSchema.parse(req.body);
+        if(!parsedBody){
+            return res.status(400).json({message:"Invalid request body"})
+        }
+        const {testId, userAnswers} = parsedBody;
+        const test = await prisma.test.findUnique({where:{id:testId},select:{
+            id:true,
+            userId:true,
+            title:true,
+            topic:true,
+            difficulty:true,
+            numQuestions:true,
+            pdfUrl:true,
+            urls:true,
+            questions:true,
+            answers:true,
+            isCompleted:true,
+        }})
+        if(!test){
+            return res.status(400).json({message:"Test not found"})
+        }
+        
+        return res.status(200).json({test})
+    }catch(e){
+        return res.status(400).json({message:"Internal server error",error:e})
+    }
+})
+
 testRouter.post("/submit-test", authMiddleware, async(req:any, res:any) => {
     try{
-        const parsedBody = testSchema.parse(req.body);
+        const parsedBody = await submitTestSchema.parse(req.body);
+        if(!parsedBody){
+            return res.status(400).json({message:"Invalid request body"})
+        }
+        const {testId, userAnswers, score, isCompleted, isSubmitted, correctAnswers, incorrectAnswers, skippedAnswers} = parsedBody;
+
+        const test = await prisma.test.findUnique({where:{id:testId}})
+        if(!test){
+            return res.status(400).json({message:"Test not found"})
+        }
+        await prisma.test.update({
+            where:{
+                id:testId
+            },
+            data:{
+                isCompleted:true,
+            }
+        })
+        const testResult = await prisma.testResult.create({
+            data:{
+                testId,
+                userId:req.userId,
+                userAnswers:Object.entries(userAnswers).map(([questionId, answer]) => ({ questionId, answer })),
+                score,
+                correctAnswers,
+                incorrectAnswers,
+                skippedAnswers
+            }
+        })
+        return res.status(200).json({message:"Test submitted",testResult})
+    }catch(e){
+        return res.status(400).json({message:"Internal server error",error:e})
+    }
+})
+
+testRouter.get("/get-test-results/:id", authMiddleware, async(req:any, res:any) => {
+    try{
+        const testId = req.params.id;
+        const testResults = await prisma.testResult.findFirst({where:{testId},select:{
+            userAnswers:true,
+            score:true,
+            correctAnswers:true,
+            incorrectAnswers:true,
+            skippedAnswers:true,
+        }})
+        return res.status(200).json({testResults})
     }catch(e){
         return res.status(400).json({message:"Internal server error",error:e})
     }

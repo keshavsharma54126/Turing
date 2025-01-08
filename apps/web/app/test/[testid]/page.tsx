@@ -1,34 +1,135 @@
 "use client"
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { dummyTests } from '../../../dummyTests';
-import { prisma } from '@repo/db/client';
 import axios from 'axios';
+
+interface UserAnswers {
+  [key: number]: string
+}
+
 const TestPage = () => {
   const params = useParams();
   const testId = params.testid as string;
   
   const [test, setTest] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
+  const [userAnswers, setUserAnswers] = useState<UserAnswers>({});
   const [answeredQuestions, setAnsweredQuestions] = useState(0);
-
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [score, setScore] = useState(0);
+  const [correctAnswers, setCorrectAnswers] = useState(0);
+  const [incorrectAnswers, setIncorrectAnswers] = useState(0);
+  const [skippedAnswers, setSkippedAnswers] = useState(0);
   useEffect(() => {
     setLoading(true);
     // Simulate API call with dummy data
     const fetchTest = async () => {
-      const token = localStorage.getItem('authToken');
-      const test = await axios.get(`http://localhost:3000/api/v1/tests/get-test/${testId}`,{
+      let token = '';
+      if(typeof window !== 'undefined'){
+        token = localStorage.getItem('authToken')!;
+      }
+      const test = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/tests/get-test/${testId}`,{
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
+      console.log(test.data.test)
       setTest(test.data.test);
       setLoading(false);
-    };
 
+    };
+ 
     fetchTest();
+
   }, [testId]);
+
+  useEffect(()=>{
+    const evaluateTest = async()=>{
+      let token = '';
+      if(typeof window !== 'undefined'){
+        token = localStorage.getItem('authToken')!;
+      }
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/tests/evaluate-test`,{
+        testId,
+        userAnswers
+      },{
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      console.log(response.data.test)
+      setTest(response.data.test)
+      setScore(response.data.score)
+      setCorrectAnswers(response.data.correctAnswers)
+      setIncorrectAnswers(response.data.incorrectAnswers)
+      setSkippedAnswers(response.data.skippedAnswers)
+      setIsSubmitted(true)
+      setAnsweredQuestions(Object.keys(userAnswers).length)
+      // setUserAnswers(response.data.userAnswers)
+      const testResults = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/tests/get-test-results/${testId}`,{
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      console.log(testResults.data.testResults.userAnswers)
+      setUserAnswers(testResults.data.testResults.userAnswers)
+    }
+    
+    evaluateTest()
+  },[isSubmitted])
+
+  const handleSubmitTest = async () => {
+    setLoading(true);
+    let token = '';
+    if(typeof window !== 'undefined'){
+      token = localStorage.getItem('authToken')!;
+    }
+    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/tests/evaluate-test`,{
+      testId,
+      userAnswers
+    },{
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    setTest(response.data.test)
+    await evaluateAnswers(userAnswers,test.questions)
+    setLoading(false)
+    setIsSubmitted(true)
+    setCorrectAnswers(score)
+    setIncorrectAnswers(test.questions.length-score)
+    setSkippedAnswers(test.questions.length-Object.keys(userAnswers).length)
+
+    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/tests/submit-test`,{
+      testId,
+      userAnswers,
+      score,
+      isCompleted:true,
+      isSubmitted:true,
+      correctAnswers,
+      incorrectAnswers,
+      skippedAnswers
+    },{
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+  }
+
+  const evaluateAnswers = async(userAnswers:UserAnswers,questions:any)=>{
+     for(let i=0;i<questions.length;i++){
+        if(userAnswers[i] === questions[i].correctAnswer){
+            setScore(prev=>prev+1)
+        }
+     }
+     setUserAnswers((prev:any)=>({...prev,}))
+     setIsSubmitted(true)
+     setCorrectAnswers(score)
+     setIncorrectAnswers(questions.length-score)
+     setSkippedAnswers(questions.length-Object.keys(userAnswers).length)
+     setAnsweredQuestions(Object.keys(userAnswers).length)
+     
+  }
 
   if (loading) {
     return (
@@ -81,7 +182,7 @@ const TestPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto flex flex-col gap-8">
         {/* Test Header Card */}
         <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
           <div className="mb-6">
@@ -118,6 +219,19 @@ const TestPage = () => {
               />
             </div>
           </div>
+
+          {/* Scorecard */}
+          {isSubmitted && (
+            <div className="bg-green-100 border-3 border-black p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mt-6">
+              <p className="font-black text-black text-center text-xl">TEST SUBMITTED</p>
+              <div className="mt-4 space-y-2">
+                <p className="font-bold text-lg">Score: {score}</p>
+                <p className="font-bold text-lg">Correct Answers: {correctAnswers}</p>
+                <p className="font-bold text-lg">Incorrect Answers: {incorrectAnswers}</p>
+                <p className="font-bold text-lg">Skipped Answers: {skippedAnswers}</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Questions */}
@@ -140,49 +254,61 @@ const TestPage = () => {
               {/* Options */}
               <div className="p-6">
                 <div className="space-y-4">
-                  {q.options.map((option: string, optIdx: number) => (
-                    <div 
-                      key={optIdx} 
-                      onClick={() => setUserAnswers((prev: any) => ({
-                        ...prev,
-                        [idx]: prev[idx] === option ? undefined : option,
-                        answeredQuestions: prev.answeredQuestions + 1,
-                        progress: (prev.answeredQuestions + 1) / test.questions.length * 100
-                      }))}
-                      className={`flex items-center gap-4 p-4 cursor-pointer transition-all
-                        border-3 border-black
-                        ${userAnswers[idx] === option 
-                          ? 'bg-[#1B4D3E] text-white shadow-none translate-x-[3px] translate-y-[3px]' 
-                          : 'bg-white hover:bg-gray-50 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]'
-                        }`}
-                    >
-                      <div className={`w-6 h-6 flex items-center justify-center border-2 border-black transition-all
-                        ${userAnswers[idx] === option
-                          ? 'bg-white'
-                          : 'bg-transparent'
-                        }`}
+                  {q.options.map((option: string, optIdx: number) => {
+                    const isCorrect = q.correctAnswer === option;
+                    const isSelected = userAnswers[idx] === option;
+                    const optionStyle = isSubmitted
+                      ? isCorrect
+                        ? 'bg-green-100 text-green-800'
+                        : isSelected
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-white'
+                      : isSelected
+                      ? 'bg-[#1B4D3E] text-white'
+                      : 'bg-white hover:bg-gray-50';
+
+                    return (
+                      <div 
+                        key={optIdx} 
+                        onClick={() => !isSubmitted && setUserAnswers((prev: UserAnswers) => {
+                          if(prev[idx] === option){
+                            const newAnswer = {...prev} as UserAnswers;
+                            delete newAnswer[idx];
+                            setAnsweredQuestions(Object.keys(newAnswer).length);
+                            return newAnswer;
+                          }
+                          const newAnswers = {...prev, [idx]: option};
+                          setAnsweredQuestions(Object.keys(newAnswers).length);
+                          return newAnswers;
+                        })}
+                        className={`flex items-center gap-4 p-4 cursor-pointer transition-all
+                          border-3 border-black ${optionStyle} shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`}
                       >
-                        {userAnswers[idx] === option && (
-                          <svg 
-                            className="w-4 h-4 text-black" 
-                            fill="none" 
-                            viewBox="0 0 24 24" 
-                            stroke="currentColor"
-                          >
-                            <path 
-                              strokeLinecap="square" 
-                              strokeLinejoin="round" 
-                              strokeWidth={3} 
-                              d="M5 13l4 4L19 7" 
-                            />
-                          </svg>
-                        )}
+                        <div className={`w-6 h-6 flex items-center justify-center border-2 border-black transition-all
+                          ${isSelected ? 'bg-white' : 'bg-transparent'}`}
+                        >
+                          {isSelected && (
+                            <svg 
+                              className="w-4 h-4 text-black" 
+                              fill="none" 
+                              viewBox="0 0 24 24" 
+                              stroke="currentColor"
+                            >
+                              <path 
+                                strokeLinecap="square" 
+                                strokeLinejoin="round" 
+                                strokeWidth={3} 
+                                d="M5 13l4 4L19 7" 
+                              />
+                            </svg>
+                          )}
+                        </div>
+                        <label className="flex-1 cursor-pointer font-bold">
+                          {option}
+                        </label>
                       </div>
-                      <label className="flex-1 cursor-pointer font-bold">
-                        {option}
-                      </label>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               
                 {/* Neo-Brutalist Explanation Card */}
@@ -205,20 +331,21 @@ const TestPage = () => {
             </div>
           ))}
         </div>
+      </div>
 
-
-          <div className="fixed bottom-0 left-0 right-0 px-4">
-            <div className="max-w-4xl mx-auto">
-              <button 
-                className="w-full bg-[#eb4b4b] text-white p-4 font-black text-lg border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] 
-                hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none transition-all"
-                onClick={() => alert('Test submitted!')}
-              >
-                SUBMIT TEST
-              </button>
-            </div>
-          </div>
-        
+      {/* Submit Button */}
+      <div className="fixed bottom-0 left-0 right-0 px-4">
+        <div className="max-w-4xl mx-auto">
+          {!isSubmitted && (
+            <button 
+              className="w-full bg-[#eb4b4b] text-white p-4 font-black text-lg border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] 
+              hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none transition-all"
+              onClick={handleSubmitTest}
+            >
+              SUBMIT TEST
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

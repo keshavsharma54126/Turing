@@ -19,3 +19,19 @@ export const testSchema = z.object({
     pdfUrl:z.array(z.string()).default([]),
     urls:z.array(z.string()).default([])
 })
+
+export const evaluateTestSchema = z.object({
+    testId:z.string(),
+    userAnswers:z.record(z.string(),z.string())
+})
+
+export const submitTestSchema = z.object({
+    testId:z.string(),
+    userAnswers:z.record(z.string(),z.string()),
+    score:z.number(),
+    isCompleted:z.boolean(),
+    isSubmitted:z.boolean(),
+    correctAnswers:z.number(),
+    incorrectAnswers:z.number(),
+    skippedAnswers:z.number()
+})

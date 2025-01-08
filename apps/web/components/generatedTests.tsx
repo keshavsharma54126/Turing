@@ -43,7 +43,7 @@ const GeneratedTests = () => {
           return;
         }
         const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/tests`,
+          `${process.env.NEXT_PUBLIC_API_URL}/user/tests`,
           {
             headers:{
               "Authorization":`Bearer ${token}`
@@ -64,7 +64,7 @@ const GeneratedTests = () => {
       if(!token){
         return;
       }
-      const response = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/tests/delete-test/${testId}`,{
+      const response = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/tests/delete-test/${testId}`,{
         headers:{
           "Authorization":`Bearer ${token}`
         }
