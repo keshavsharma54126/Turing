@@ -22,9 +22,12 @@ const TestPage = () => {
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [incorrectAnswers, setIncorrectAnswers] = useState(0);
   const [skippedAnswers, setSkippedAnswers] = useState(0);
+  const[onSubmitClick,setOnSubmitClick] = useState(false)
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
   useEffect(() => {
     setLoading(true);
-    let tempIsSubmitted=false
+    let tempTestData = {}
     const fetchTest = async () => {
       try{
         let token = '';
@@ -36,10 +39,10 @@ const TestPage = () => {
           'Authorization': `Bearer ${token}`
         }
       });
-      console.log(test.data.test)
       setTest(test.data.test);
       setLoading(false);
       setIsSubmitted(test.data.test.isCompleted)
+      tempTestData=test.data.test
       }catch(err){
         console.error("error while fetcing test",err)
       }
@@ -59,7 +62,6 @@ const TestPage = () => {
           'Authorization': `Bearer ${token}`
         }
       })
-      console.log(response.data.test)
       setTest(response.data.test)
       const testResults = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/tests/get-test-results/${testId}`,{
         headers: {
@@ -92,7 +94,11 @@ const TestPage = () => {
      fetchTest();
 
       setTimeout(()=>{
-        evaluateTest()
+        //@ts-ignore
+        if(tempTestData?.isCompleted){
+          console.log("now test come")
+          evaluateTest()
+        }
       },2000)
       
 
@@ -100,53 +106,58 @@ const TestPage = () => {
 
 
   const handleSubmitTest = async () => {
+    setShowConfirmDialog(true);
+  }
+
+  const confirmSubmit = async () => {
+    setShowConfirmDialog(false);
     setLoading(false);
-   try{
-    let token = '';
-    if(typeof window !== 'undefined'){
-      token = localStorage.getItem('authToken')!;
-    }
-    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/tests/evaluate-test`,{
-      testId,
-      userAnswers
-    },{
-      headers: {
-        'Authorization': `Bearer ${token}`
+    try {
+      let token = '';
+      if(typeof window !== 'undefined'){
+        token = localStorage.getItem('authToken')!;
       }
-    })
-    setTest(response.data.test)
-    setIsSubmitted(true)
-     const {newScore,newCorrectAnswers,totalQuestions,totalAnsweredQuestions} = await evaluateAnswers(userAnswers,test.questions)
-     setScore(newScore)
-     setCorrectAnswers(newCorrectAnswers)
-     setIncorrectAnswers(totalQuestions-newCorrectAnswers)
-     setSkippedAnswers(totalAnsweredQuestions-Object.keys(userAnswers).length)
-
-     console.log(newScore,newCorrectAnswers,totalQuestions,totalAnsweredQuestions)
-
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/tests/submit-test`,{
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/tests/evaluate-test`,{
         testId,
-        userAnswers,
-        score:newScore,
-        isCompleted:true,
-        isSubmitted:true,
-        correctAnswers:newCorrectAnswers,
-        incorrectAnswers:totalQuestions-newCorrectAnswers,
-        skippedAnswers:totalAnsweredQuestions-Object.keys(userAnswers).length
+        userAnswers
       },{
         headers: {
           'Authorization': `Bearer ${token}`
         }
       })
-       setLoading(false)
+      setTest(response.data.test)
+      setIsSubmitted(true)
+       const {newScore,newCorrectAnswers,totalQuestions,totalAnsweredQuestions} = await evaluateAnswers(userAnswers,test.questions)
+       setScore(newScore)
+       setCorrectAnswers(newCorrectAnswers)
+       setIncorrectAnswers(totalQuestions-newCorrectAnswers)
+       setSkippedAnswers(totalAnsweredQuestions-Object.keys(userAnswers).length)
 
-       
-   }catch(error){
-    console.error("error while submitting test: ",error)
-   }finally{
-    setLoading(false)
-   }
-       
+       console.log(newScore,newCorrectAnswers,totalQuestions,totalAnsweredQuestions)
+
+        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/tests/submit-test`,{
+          testId,
+          userAnswers,
+          score:newScore,
+          isCompleted:true,
+          isSubmitted:true,
+          correctAnswers:newCorrectAnswers,
+          incorrectAnswers:totalQuestions-newCorrectAnswers,
+          skippedAnswers:totalAnsweredQuestions-Object.keys(userAnswers).length
+        },{
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+         setLoading(false)
+
+         
+    }catch(error){
+      console.error("error while submitting test: ",error)
+    }finally{
+      setLoading(false)
+    }
+         
   }
 
   const evaluateAnswers = async(userAnswers:UserAnswers,questions:any)=>{
@@ -229,8 +240,8 @@ const TestPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-4xl mx-auto flex flex-col gap-8">
+    <div className="min-h-screen max-w-screen bg-gray-50 py-8 px-4">
+      <div className="max-w-7xl mx-auto flex flex-col gap-8">
         {/* Test Header Card */}
         <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
           <div className="mb-6">
@@ -434,7 +445,13 @@ const TestPage = () => {
         </div>
       </div>
 
-      {/* Submit Button */}
+      {onSubmitClick && (
+        <div>
+          
+        </div>
+      )}
+
+      {/* Submit Button and Confirmation Dialog */}
       <div className="fixed bottom-0 left-0 right-0 px-4">
         <div className="max-w-4xl mx-auto">
           {!isSubmitted && (
@@ -448,6 +465,34 @@ const TestPage = () => {
           )}
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      {showConfirmDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-md w-full">
+            <h3 className="text-2xl font-black mb-4">Are you sure?</h3>
+            <p className="text-gray-600 mb-6">
+              Once submitted, you won't be able to change your answers. Make sure you've reviewed all questions.
+            </p>
+            <div className="flex gap-4">
+              <button
+                onClick={() => setShowConfirmDialog(false)}
+                className="flex-1 bg-gray-200 text-black p-3 font-bold border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] 
+                hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none transition-all"
+              >
+                CANCEL
+              </button>
+              <button
+                onClick={confirmSubmit}
+                className="flex-1 bg-[#eb4b4b] text-white p-3 font-bold border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] 
+                hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none transition-all"
+              >
+                SUBMIT
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

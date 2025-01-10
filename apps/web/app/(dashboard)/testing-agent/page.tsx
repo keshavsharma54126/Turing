@@ -91,6 +91,7 @@ const TestingAgent = () => {
   const router = useRouter();
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
+  const[error,setError] = useState("")
 
   useEffect(() => {
     if (isLoading) {
@@ -147,6 +148,11 @@ const TestingAgent = () => {
       let token = "";
      if(typeof window !== 'undefined'){
       token = localStorage.getItem("authToken")!;
+     }
+     if(!topic.trim()){
+        alert("Topic of Test can not be empty")
+        setIsLoading(false)
+        return
      }
       const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/tests/generate-test`,{
         title: topic,
@@ -324,7 +330,7 @@ const TestingAgent = () => {
 
           <button
             onClick={handleGenerateTest}
-            disabled={isLoading}
+            disabled={isLoading }
             className="brutalist-button bg-[#1B4D3E] text-white px-6 py-3 w-full"
           >
             {isLoading ? 'Generating Test...' : 'Generate Test'}
