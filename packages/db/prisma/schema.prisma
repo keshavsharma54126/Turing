@@ -88,8 +88,9 @@ model TestResult {
 
 model Conversation {
   id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  messages  Json
+  userId    String   @map("user_id") 
+  topic     String    
+  messages  Json?
   resources Resource[] @relation("ConversationResources")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
