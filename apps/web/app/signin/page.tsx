@@ -7,18 +7,22 @@ import axios from 'axios';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 
 export default function SignIn() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const[loading,setLoading] = useState(false)
   const router = useRouter();
 
   useEffect(() => {
+    setLoading(true)
     if (typeof window !== 'undefined' && localStorage.getItem('authToken')) {
       router.push('/home');
     }
+    setLoading(false)
   }, [router]);
 
   const handleSignIn = async () => {
@@ -43,111 +47,120 @@ export default function SignIn() {
     }
   }
 
+  if(loading){
+    return <div className='flex justify-center items-center h-screen'>
+      <Loader2 size={24} className='animate-spin' />
+    </div>
+  }
 
-  return (
-    <div className="min-h-screen gradient-bg relative">
-      <div className="absolute inset-0 pattern-grid opacity-30"></div>
-      <div className="relative z-10 flex items-center justify-center min-h-screen">
-        <div className="max-w-md w-full mx-4">
-          <div className="text-center mb-8">
-            <Link href="/" className="text-2xl font-bold">
-              TURING AI
-            </Link>
-            <h2 className="text-3xl font-bold mt-6 mb-2">Welcome Back</h2>
-            <p className="text-gray-600 font-mono">Sign in to continue learning</p>
-          </div>
-
-          <div className="brutalist-card bg-white p-8">
-            <form className="space-y-6">
-              <div>
-                <label htmlFor="email" className="block text-sm font-bold mb-2">
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-3 border-2 border-gray-800 focus:outline-none focus:border-[#B8D8E3] font-mono"
-                  placeholder="you@example.com"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="password" className="block text-sm font-bold mb-2">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-3 border-2 border-gray-800 focus:outline-none focus:border-[#B8D8E3] font-mono"
-                  placeholder="••••••••"
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="remember"
-                    className="h-4 w-4 border-2 border-gray-800"
-                  />
-                  <label htmlFor="remember" className="ml-2 text-sm">
-                    Remember me
-                  </label>
-                </div>
-                <Link href="/forgot-password" className="text-sm text-[#FF6B6B] hover:text-[#FF8C66]">
-                  Forgot password?
-                </Link>
-              </div>
-
-              <button
-                type="submit"
-                onClick={handleSignIn}
-                className="brutalist-button w-full py-3 bg-[#FF6B6B] hover:bg-[#FF8C66] text-white font-bold"
-              >
-                Sign In
-              </button>
-            </form>
-
-            <div className="mt-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Or continue with</span>
-                </div>
-              </div>
-
-              <div className="mt-6 grid grid-cols-2 gap-4">
-                <GoogleLoginButton />
-                <button className="brutalist-button w-full py-3 bg-[#FF6B6B] hover:bg-[#FF8C66] text-white font-bold flex items-center justify-center">
-                  <FaGithub className="mr-2 text-xl" />
-                  GitHub
-                </button>
-              </div>
+  else{
+    return (
+      <div className="min-h-screen gradient-bg relative">
+        <div className="absolute inset-0 pattern-grid opacity-30"></div>
+        <div className="relative z-10 flex items-center justify-center min-h-screen">
+          <div className="max-w-md w-full mx-4">
+            <div className="text-center mb-8">
+              <Link href="/" className="text-2xl font-bold">
+                TURING AI
+              </Link>
+              <h2 className="text-3xl font-bold mt-6 mb-2">Welcome Back</h2>
+              <p className="text-gray-600 font-mono">Sign in to continue learning</p>
             </div>
-            {error && <div className="text-red-500 text-center mt-4">{error}</div>}
-            {isLoading && (
-              <div className="text-center mt-4">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#FF6B6B] border-t-transparent"></div>
+  
+            <div className="brutalist-card bg-white p-8">
+              <form className="space-y-6">
+                <div>
+                  <label htmlFor="email" className="block text-sm font-bold mb-2">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full p-3 border-2 border-gray-800 focus:outline-none focus:border-[#B8D8E3] font-mono"
+                    placeholder="you@example.com"
+                  />
+                </div>
+  
+                <div>
+                  <label htmlFor="password" className="block text-sm font-bold mb-2">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full p-3 border-2 border-gray-800 focus:outline-none focus:border-[#B8D8E3] font-mono"
+                    placeholder="••••••••"
+                  />
+                </div>
+  
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="remember"
+                      className="h-4 w-4 border-2 border-gray-800"
+                    />
+                    <label htmlFor="remember" className="ml-2 text-sm">
+                      Remember me
+                    </label>
+                  </div>
+                  <Link href="/forgot-password" className="text-sm text-[#FF6B6B] hover:text-[#FF8C66]">
+                    Forgot password?
+                  </Link>
+                </div>
+  
+                <button
+                  type="submit"
+                  onClick={handleSignIn}
+                  className="brutalist-button w-full py-3 bg-[#FF6B6B] hover:bg-[#FF8C66] text-white font-bold"
+                >
+                  Sign In
+                </button>
+              </form>
+  
+              <div className="mt-6">
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                  </div>
+                </div>
+  
+                <div className="mt-6 grid grid-cols-2 gap-4">
+                  <GoogleLoginButton />
+                  <button className="brutalist-button w-full py-3 bg-[#FF6B6B] hover:bg-[#FF8C66] text-white font-bold flex items-center justify-center">
+                    <FaGithub className="mr-2 text-xl" />
+                    GitHub
+                  </button>
+                </div>
               </div>
-            )}
+              {error && <div className="text-red-500 text-center mt-4">{error}</div>}
+              {isLoading && (
+                <div className="text-center mt-4">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#FF6B6B] border-t-transparent"></div>
+                </div>
+              )}
+            </div>
+  
+            <p className="mt-8 text-center text-sm text-gray-600">
+              Don't have an account?{' '}
+              <Link href="/signup" className="text-[#FF6B6B] hover:text-[#FF8C66] font-bold">
+                Sign up
+              </Link>
+            </p>
           </div>
-
-          <p className="mt-8 text-center text-sm text-gray-600">
-            Don't have an account?{' '}
-            <Link href="/signup" className="text-[#FF6B6B] hover:text-[#FF8C66] font-bold">
-              Sign up
-            </Link>
-          </p>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  
 }
 
 

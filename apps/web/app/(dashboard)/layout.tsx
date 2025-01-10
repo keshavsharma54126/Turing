@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Home, TestTube, GraduationCap, Settings, Menu, X, LogOut } from 'lucide-react';
+import { Home, TestTube, GraduationCap, Settings, Menu, X, LogOut, Loader2 } from 'lucide-react';
 import './dashboard.css';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
@@ -29,11 +29,14 @@ const Sidebar = () => {
     { icon: <Settings size={20} />, label: 'Settings', href: '/settings' },
 
   ];
+  const[loading,setLoading] = useState(false)
 
   useEffect(()=>{
+    setLoading(true)
     if(!localStorage.getItem('authToken')){
       router.push('/signin');
     }
+    setLoading(false)
   },[router])
 
   const handleLogout = () => {
@@ -43,7 +46,11 @@ const Sidebar = () => {
     }
   };
 
-
+  if(loading){
+    return <div className='flex justify-center items-center h-screen'>
+      <Loader2 size={24} className='animate-spin' />
+    </div>
+  }
 
   return (
     <>
