@@ -22,12 +22,12 @@ export const testSchema = z.object({
 
 export const evaluateTestSchema = z.object({
     testId:z.string(),
-    userAnswers:z.record(z.string(),z.string())
+    userAnswers:z.array(z.record(z.string(),z.string())).optional()
 })
 
 export const submitTestSchema = z.object({
     testId:z.string(),
-    userAnswers:z.record(z.string(),z.string()),
+    userAnswers:z.record(z.string(),z.string()) ,
     score:z.number(),
     isCompleted:z.boolean(),
     isSubmitted:z.boolean(),

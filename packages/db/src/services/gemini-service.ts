@@ -4,17 +4,22 @@ const geminiClient = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string
 
 export class GeminiService {
     static async generateEmbedding(text: string) {
-        const embeddingModel = geminiClient.getGenerativeModel({
-            model: "models/embedding-001"
-        });
-        
-        const response = await embeddingModel.embedContent(text);
-        const embedding = response.embedding;
-
-        return embedding.values;
+        try{
+            const embeddingModel = geminiClient.getGenerativeModel({
+                model: "models/embedding-001"
+            });
+            
+            const response = await embeddingModel.embedContent(text);
+            const embedding = response.embedding;
+    
+            return embedding.values;
+        }catch(e){
+            console.error("error while generating embeddings",e)
+        }
     }
 
     static async generateResponse(text: string, systemInstruction: string) {
+       try{
         const model = geminiClient.getGenerativeModel({
             model: "gemini-1.5-pro",
             generationConfig: {
@@ -27,5 +32,8 @@ export class GeminiService {
         const result = await model.generateContent(text);
         const content = await result.response.text();
         return content;
+       }catch(e){
+        console.error("error while generating responses from gemini",e)
+       }
     }
 }

@@ -14,6 +14,7 @@ const TestPage = () => {
   const [test, setTest] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [userAnswers, setUserAnswers] = useState<UserAnswers>({});
+  const[fetchedUserAnswers,setFetchedUserAnswers] = useState<any[]>([])
   const [answeredQuestions, setAnsweredQuestions] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [score, setScore] = useState(0);
@@ -22,13 +23,13 @@ const TestPage = () => {
   const [skippedAnswers, setSkippedAnswers] = useState(0);
   useEffect(() => {
     setLoading(true);
-    // Simulate API call with dummy data
     const fetchTest = async () => {
-      let token = '';
+      try{
+        let token = '';
       if(typeof window !== 'undefined'){
         token = localStorage.getItem('authToken')!;
       }
-      const test = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/tests/get-test/${testId}`,{
+      const test = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/tests/get-test/${testId}`,{
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -36,27 +37,26 @@ const TestPage = () => {
       setTest(test.data.test);
       setLoading(false);
       setIsSubmitted(test.data.test.isSubmitted)
+      }catch(err){
+        console.error("error while fetcing test",err)
+      }
 
-    };
- 
-    fetchTest();
-
-  }, [testId]);
-
-  useEffect(()=>{
+    };    
     const evaluateTest = async()=>{
-      let token = '';
+      try{
+        let token = '';
       if(typeof window !== 'undefined'){
         token = localStorage.getItem('authToken')!;
       }
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/tests/evaluate-test`,{
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/tests/evaluate-test`,{
         testId,
-        userAnswers
+        useranswers:[]
       },{
         headers: {
           'Authorization': `Bearer ${token}`
         }
       })
+      console.log(response.data.test)
       setTest(response.data.test)
       setScore(response.data.score)
       setCorrectAnswers(response.data.correctAnswers)
@@ -64,27 +64,38 @@ const TestPage = () => {
       setSkippedAnswers(response.data.skippedAnswers)
       setIsSubmitted(response.data.isSubmitted)
       setAnsweredQuestions(Object.keys(userAnswers).length)
-      // setUserAnswers(response.data.userAnswers)
-      const testResults = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/tests/get-test-results/${testId}`,{
+      setUserAnswers(response.data.userAnswers)
+      const testResults = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/tests/get-test-results/${testId}`,{
         headers: {
           'Authorization': `Bearer ${token}`
         }
       })
+      console.log(testResults.data)
       if(testResults.data.testResults){
-        setUserAnswers(testResults.data.testResults.userAnswers)
+        console.log(testResults.data.testResults.userAnswers)
+        setFetchedUserAnswers(testResults.data.testResults.userAnswers)
+      }
+      }catch(err){
+        console.error("error while fetchign results",err)
       }
     }
-        evaluateTest()
-      
-  },[isSubmitted])
+ 
+    fetchTest();
+
+      evaluateTest()
+  
+
+  }, [testId]);
+
 
   const handleSubmitTest = async () => {
-    setLoading(true);
+    setLoading(false);
+   try{
     let token = '';
     if(typeof window !== 'undefined'){
       token = localStorage.getItem('authToken')!;
     }
-    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/tests/evaluate-test`,{
+    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/tests/evaluate-test`,{
       testId,
       userAnswers
     },{
@@ -93,13 +104,16 @@ const TestPage = () => {
       }
     })
     setTest(response.data.test)
+    setIsSubmitted(true)
      const {newScore,newCorrectAnswers,totalQuestions,totalAnsweredQuestions} = await evaluateAnswers(userAnswers,test.questions)
      setScore(newScore)
      setCorrectAnswers(newCorrectAnswers)
      setIncorrectAnswers(totalQuestions-newCorrectAnswers)
      setSkippedAnswers(totalAnsweredQuestions-Object.keys(userAnswers).length)
 
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/tests/submit-test`,{
+     console.log(newScore,newCorrectAnswers,totalQuestions,totalAnsweredQuestions)
+
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/tests/submit-test`,{
         testId,
         userAnswers,
         score:newScore,
@@ -114,8 +128,13 @@ const TestPage = () => {
         }
       })
        setLoading(false)
-       setIsSubmitted(true)
-       window.location.reload()
+
+       
+   }catch(error){
+    console.error("error while submitting test: ",error)
+   }finally{
+    setLoading(false)
+   }
        
   }
 
@@ -134,14 +153,14 @@ const TestPage = () => {
             newCorrectAnswers+=1
         }
      }
-     console.log(score)
+     console.log(newScore)
      setUserAnswers((prev:any)=>({...prev,}))
      setIsSubmitted(true)
      setCorrectAnswers(correctAnswers)
      setIncorrectAnswers(questions.length-correctAnswers)
      setSkippedAnswers(questions.length-Object.keys(userAnswers).length)
      setAnsweredQuestions(Object.keys(userAnswers).length)
-
+    
 
      return {newScore,newCorrectAnswers,totalQuestions,totalAnsweredQuestions}
 
@@ -273,7 +292,8 @@ const TestPage = () => {
                 <div className="space-y-4">
                   {q.options.map((option: string, optIdx: number) => {
                     const isCorrect = q.correctAnswer === option;
-                    const isSelected = userAnswers[idx] === option;
+                    console.log(fetchedUserAnswers)
+                    const isSelected = fetchedUserAnswers[idx]?.answer === option;
                     const optionStyle = isSubmitted
                       ? isCorrect
                         ? 'bg-green-100 text-green-800'
@@ -329,7 +349,7 @@ const TestPage = () => {
                 </div>
               
                 {/* Neo-Brutalist Explanation Card */}
-                {(userAnswers[idx] && test.isCompleted) && (
+                {(fetchedUserAnswers[idx] && test.isCompleted) && (
                   <div className="mt-6">
                     <div className="bg-yellow-100 border-3 border-black p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                       <div className="flex items-center gap-2 mb-3">
