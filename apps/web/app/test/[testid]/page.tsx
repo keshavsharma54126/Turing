@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
+import { projectHmrEvents } from 'next/dist/build/swc/generated-native';
 
 interface UserAnswers {
   [key: number]: string | undefined
@@ -23,6 +24,7 @@ const TestPage = () => {
   const [skippedAnswers, setSkippedAnswers] = useState(0);
   useEffect(() => {
     setLoading(true);
+    let tempIsSubmitted=false
     const fetchTest = async () => {
       try{
         let token = '';
@@ -34,9 +36,10 @@ const TestPage = () => {
           'Authorization': `Bearer ${token}`
         }
       });
+      console.log(test.data.test)
       setTest(test.data.test);
       setLoading(false);
-      setIsSubmitted(test.data.test.isSubmitted)
+      setIsSubmitted(test.data.test.isCompleted)
       }catch(err){
         console.error("error while fetcing test",err)
       }
@@ -50,7 +53,7 @@ const TestPage = () => {
       }
       const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/tests/evaluate-test`,{
         testId,
-        useranswers:[]
+        userAnswers
       },{
         headers: {
           'Authorization': `Bearer ${token}`
@@ -58,32 +61,40 @@ const TestPage = () => {
       })
       console.log(response.data.test)
       setTest(response.data.test)
-      setScore(response.data.score)
-      setCorrectAnswers(response.data.correctAnswers)
-      setIncorrectAnswers(response.data.incorrectAnswers)
-      setSkippedAnswers(response.data.skippedAnswers)
-      setIsSubmitted(response.data.isSubmitted)
-      setAnsweredQuestions(Object.keys(userAnswers).length)
-      setUserAnswers(response.data.userAnswers)
       const testResults = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/tests/get-test-results/${testId}`,{
         headers: {
           'Authorization': `Bearer ${token}`
         }
       })
-      console.log(testResults.data)
       if(testResults.data.testResults){
-        console.log(testResults.data.testResults.userAnswers)
+        console.log(testResults.data.testResults)
         setFetchedUserAnswers(testResults.data.testResults.userAnswers)
+        
+        // Transform the userAnswers array into an object
+        const transformedUserAnswers = testResults.data.testResults.userAnswers.reduce((acc: UserAnswers, curr: any, index: number) => {
+          acc[index] = curr.answer;
+          return acc;
+        }, {})
+        
+        setUserAnswers(transformedUserAnswers)
       }
+
+      setScore(testResults.data?.testResults?.score)
+      setCorrectAnswers(testResults.data?.testResults?.correctAnswers)
+      setIncorrectAnswers(testResults.data?.testResults?.incorrectAnswers)
+      setSkippedAnswers(testResults.data?.testResults?.skippedAnswers)
+
       }catch(err){
-        console.error("error while fetchign results",err)
+        console.error("error while fetching results",err)
       }
     }
  
-    fetchTest();
+     fetchTest();
 
-      evaluateTest()
-  
+      setTimeout(()=>{
+        evaluateTest()
+      },2000)
+      
 
   }, [testId]);
 
@@ -160,6 +171,7 @@ const TestPage = () => {
      setIncorrectAnswers(questions.length-correctAnswers)
      setSkippedAnswers(questions.length-Object.keys(userAnswers).length)
      setAnsweredQuestions(Object.keys(userAnswers).length)
+
     
 
      return {newScore,newCorrectAnswers,totalQuestions,totalAnsweredQuestions}
@@ -256,15 +268,63 @@ const TestPage = () => {
             </div>
           </div>
 
-          {/* Scorecard */}
+          {/* Enhanced Scorecard */}
           {isSubmitted && (
-            <div className="bg-green-100 border-3 border-black p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mt-6">
-              <p className="font-black text-black text-center text-xl">TEST SUBMITTED</p>
-              <div className="mt-4 space-y-2">
-                <p className="font-bold text-lg">Score: {score}</p>
-                <p className="font-bold text-lg">Correct Answers: {correctAnswers}</p>
-                <p className="font-bold text-lg">Incorrect Answers: {incorrectAnswers}</p>
-                <p className="font-bold text-lg">Skipped Answers: {skippedAnswers}</p>
+            <div className="bg-gradient-to-br from-green-50 to-green-100 border-3 border-black p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mt-6">
+              {/* Header */}
+              <div className="flex items-center justify-center gap-3 mb-6">
+                <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h2 className="font-black text-2xl text-black">TEST COMPLETED!</h2>
+              </div>
+
+              {/* Score Display */}
+              <div className="flex justify-center mb-6">
+                <div className="relative">
+                  <div className="w-32 h-32 rounded-full border-8 border-green-500 flex items-center justify-center">
+                    <div className="text-center">
+                      <span className="block text-4xl font-black">{score}</span>
+                      <span className="text-sm font-bold text-gray-600">POINTS</span>
+                    </div>
+                  </div>
+                  <div className="absolute -top-2 -right-2 bg-yellow-400 text-black text-sm font-bold px-3 py-1 border-2 border-black transform rotate-6">
+                    {Math.round((correctAnswers / test.questions.length) * 100)}%
+                  </div>
+                </div>
+              </div>
+
+              {/* Statistics Grid */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-white border-2 border-black p-4 text-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="block text-2xl font-black text-green-600">{correctAnswers}</span>
+                  <span className="text-sm font-bold text-gray-600">Correct</span>
+                </div>
+                
+                <div className="bg-white border-2 border-black p-4 text-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <svg className="w-5 h-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </div>
+                  <span className="block text-2xl font-black text-red-600">{incorrectAnswers}</span>
+                  <span className="text-sm font-bold text-gray-600">Incorrect</span>
+                </div>
+                
+                <div className="bg-white border-2 border-black p-4 text-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                    </svg>
+                  </div>
+                  <span className="block text-2xl font-black text-gray-600">{skippedAnswers}</span>
+                  <span className="text-sm font-bold text-gray-600">Skipped</span>
+                </div>
               </div>
             </div>
           )}
@@ -292,24 +352,27 @@ const TestPage = () => {
                 <div className="space-y-4">
                   {q.options.map((option: string, optIdx: number) => {
                     const isCorrect = q.correctAnswer === option;
-                    console.log(fetchedUserAnswers)
-                    const isSelected = fetchedUserAnswers[idx]?.answer === option;
-                    const optionStyle = isSubmitted
-                      ? isCorrect
-                        ? 'bg-green-100 text-green-800'
-                        : isSelected
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-white'
-                      : isSelected
-                      ? 'bg-[#1B4D3E] text-white'
-                      : 'bg-white hover:bg-gray-50';
+                    const isSelected = userAnswers[idx] === option;
+                    let optionStyle = '';
+                    
+                    if (isSubmitted) {
+                      if (isCorrect) {
+                        optionStyle = 'bg-green-100 text-green-800 border-green-500';
+                      } else if (isSelected) {
+                        optionStyle = 'bg-red-100 text-red-800 border-red-500';
+                      } else {
+                        optionStyle = 'bg-white';
+                      }
+                    } else {
+                      optionStyle = isSelected ? 'bg-[#1B4D3E] text-white' : 'bg-white hover:bg-gray-50';
+                    }
 
                     return (
                       <div 
                         key={optIdx} 
                         onClick={() => !isSubmitted && setUserAnswers((prev: UserAnswers) => {
                           if(prev[idx] === option){
-                            const newAnswer = {...prev} as UserAnswers;
+                            const newAnswer = {...prev};
                             delete newAnswer[idx];
                             setAnsweredQuestions(Object.keys(newAnswer).length);
                             return newAnswer;
@@ -324,9 +387,10 @@ const TestPage = () => {
                         <div className={`w-6 h-6 flex items-center justify-center border-2 border-black transition-all
                           ${isSelected ? 'bg-white' : 'bg-transparent'}`}
                         >
-                          {isSelected && (
+                          {(isSelected || (isSubmitted && isCorrect)) && (
                             <svg 
-                              className="w-4 h-4 text-black" 
+                              className={`w-4 h-4 ${isSubmitted && isCorrect ? 'text-green-600' : 
+                                isSubmitted && isSelected ? 'text-red-600' : 'text-black'}`}
                               fill="none" 
                               viewBox="0 0 24 24" 
                               stroke="currentColor"

@@ -108,6 +108,16 @@ const GeneratedTests = () => {
                   <h3 className="font-medium truncate mb-1">{test.title}</h3>
                   <div className="flex items-center justify-between text-sm text-gray-500">
                     <span>{new Date(test.createdAt).toLocaleDateString()}</span>
+                    <div className="flex items-center text-sm">
+                      <Clock className="w-4 h-4 mr-2 text-[#1B4D3E]" />
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${
+                        test.isCompleted 
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {test.isCompleted ? 'Completed' : 'In Progress'}
+                      </span>
+                    </div>
                     <span className={`px-2 py-0.5 rounded-full text-xs ${getDifficultyColor(test.difficulty)}`}>
                       {test.difficulty}
                     </span>
@@ -128,6 +138,16 @@ const GeneratedTests = () => {
                     <div className="flex items-center text-sm">
                       <Calendar className="w-4 h-4 mr-2 text-[#1B4D3E]" />
                       <span>Created: {new Date(test.date).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex items-center text-sm">
+                      <Clock className="w-4 h-4 mr-2 text-[#1B4D3E]" />
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${
+                        test.isCompleted 
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {test.isCompleted ? 'Completed' : 'In Progress'}
+                      </span>
                     </div>
                     <div className="flex items-center text-sm">
                       <Target className="w-4 h-4 mr-2 text-[#1B4D3E]" />

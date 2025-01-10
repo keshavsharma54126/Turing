@@ -174,7 +174,7 @@ testRouter.post("/submit-test", authMiddleware, async(req:any, res:any) => {
             data:{
                 testId,
                 userId:req.userId,
-                userAnswers:Object.entries(userAnswers).map(([questionId, answer]) => ({ questionId, answer })),
+                userAnswers: userAnswers ? Object.entries(userAnswers).map(([questionId, answer]) => ({ questionId, answer })) : [],
                 score,
                 correctAnswers,
                 incorrectAnswers,

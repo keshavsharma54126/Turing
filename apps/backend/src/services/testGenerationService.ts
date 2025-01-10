@@ -148,8 +148,11 @@ export class TestGenerationService {
         const response = await GeminiService.generateResponse(
             formattedPrompt,
             `You are a helpful assistant that extracts main concepts from given content. Only return concepts that are explicitly present in the text.and return the concepts in the same language as the content.
-            The content is in language suppose the content was in english then return the concepts in english, if it was in spanish then return the concepts in spanish, if it was in french then return the concepts in french, if it was in hindi then return the concepts in hindi.`
+            The content language will determine the response language - English content will receive English concepts, Spanish content will receive Spanish concepts, French content will receive French concepts, and Hindi content will receive Hindi concepts.`
         );
+        if (!response) {
+            throw new Error('Failed to generate response');
+        }
         return conceptMapParser.parse(response);
     }
 
@@ -227,7 +230,11 @@ export class TestGenerationService {
             await questionPrompt.format({ context, difficulty, concept }), 
             systemInstruction
         );
-        return response.replace(/```json\n?|\n?```/g, '').trim();
+        const parsedResponse = response?.replace(/```json\n?|\n?```/g, '').trim();
+        if (!parsedResponse) {
+            throw new Error('Failed to generate question - no response received');
+        }
+        return parsedResponse;
     }
 
     private static async formatTopicForSearch(topic: string): Promise<string> {
@@ -244,6 +251,9 @@ export class TestGenerationService {
         
         const formattedResponse = await GeminiService.generateResponse(prompt, 
             "You are an AI expert in educational content structuring");
+        if (!formattedResponse) {
+            throw new Error('Failed to format topic - no response received');
+        }
         return formattedResponse.trim();
     }
 }
