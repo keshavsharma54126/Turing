@@ -30,6 +30,8 @@ export class ContentProcessorService {
         const combinedContent = extractedContent.join('\n\n');
         const chunks = this.chunkContent(combinedContent);
 
+        console.log(content.conversationid)
+
         // Generate embeddings and store in vector store
         for (const chunk of chunks) {
             await VectorService.createResource({
@@ -37,7 +39,7 @@ export class ContentProcessorService {
                content: chunk,
                metadata: content.metadata,
                testId: content.testId,
-               conversationId: null
+               conversationId: content.conversationid
             });
         }
 
@@ -94,7 +96,6 @@ export class ContentProcessorService {
                 pdfParser.parseBuffer(response.data);
             });
 
-            console.log(result);
             return result;
 
         } catch (error) {

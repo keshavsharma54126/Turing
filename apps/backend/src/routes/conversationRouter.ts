@@ -93,15 +93,13 @@ conversationRouter.post("/addContext",authMiddleware,async(req:any,res:any)=>{
         }
 
         const {pdfUrl, urls,conversationId} = parsedBody.data;
-        console.log(pdfUrl,urls)
-
         const contentProcessingResult = await ContentProcessorService.processContent({
             userId: req.userId,
             conversationid:conversationId,
             pdfUrls: pdfUrl ,
             urls: urls 
         })
-
+        console.log(conversationId)
         const conversation = await prisma.conversation.findUnique({
             where:{
                 id:conversationId
@@ -142,7 +140,7 @@ conversationRouter.post("/addContext",authMiddleware,async(req:any,res:any)=>{
 conversationRouter.post("/chat-stream",authMiddleware,async(req:any,res:any)=>{
     try{
         const{question,conversationId} = req.body;
-        const relevantContext  = await VectorService.searchSimilarResourcess(question,20,0.7,conversationId)
+        const relevantContext  = await VectorService.searchSimilarResourcesByConversation(question,5,0.6,conversationId)
         console.log(relevantContext)
 
         const contextString = relevantContext && Array.isArray(relevantContext) 

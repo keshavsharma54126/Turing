@@ -72,24 +72,33 @@ export class VectorService {
         `;
     }
 
-    static async searchSimilarResourcess(query: string, limit: number = 5, similarityThreshold: number = 0.8, conversationId?: string) {
-        const queryEmbedding = await this.generateEmbedding(query);
-        
-        return prisma.$queryRaw`
-            SELECT 
-                id, 
-                user_id as "userId",
-                content, 
-                metadata,
-                test_id as "testId",
-                conversation_id as "conversationId",
-                1 - (embedding <=> ${queryEmbedding}::vector) as similarity
-            FROM resources
-            WHERE 1 - (embedding <=> ${queryEmbedding}::vector) >= ${similarityThreshold}
+
+    static async searchSimilarResourcesByConversation(query: string, limit: number, similarityThreshold: number, conversationId?: string) {
+        try {
+            const queryEmbedding = await this.generateEmbedding(query);
+            console.log('Generated embedding:', queryEmbedding);
+            
+            const results = await prisma.$queryRaw`
+                SELECT 
+                    id, 
+                    user_id as "userId",
+                    content, 
+                    metadata,
+                    test_id as "testId",
+                    conversation_id as "conversationId",
+                    1 - (embedding <=> ${queryEmbedding}::vector) as similarity
+                FROM resources
+                WHERE 1 - (embedding <=> ${queryEmbedding}::vector) >= ${similarityThreshold}
                 ${conversationId ? Prisma.sql`AND conversation_id = ${conversationId}` : Prisma.sql``}
-            ORDER BY embedding <=> ${queryEmbedding}::vector
-            LIMIT ${limit};
-        `;
+                ORDER BY embedding <=> ${queryEmbedding}::vector
+                LIMIT ${limit};
+            `;
+            console.log('Search results:', results);
+            return results;
+        } catch (error) {
+            console.error('Error in vector search:', error);
+            throw error;
+        }
     }
 
 }
