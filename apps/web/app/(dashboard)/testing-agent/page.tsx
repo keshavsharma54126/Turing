@@ -221,9 +221,9 @@ const TestingAgent = () => {
 
 
   return (
-    <div className="p-6 max-w-7xl mx-auto overflow-y-auto h-screen">
+    <div className="sm:px-4 lg:p-2 max-w-7xl mx-auto overflow-y-auto h-screen">
       <div className="flex-1 mx-auto p-6 max-w-4xl">
-        <h1 className="text-3xl font-bold mb-8">AI Test Generator</h1>
+        <h1 className="text-3xl font-bold mb-4">AI Test Generator</h1>
         
         <div className="brutalist-card bg-white p-6 mb-8 space-y-6">
           {/* File Upload Section */}

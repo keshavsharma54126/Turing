@@ -4,6 +4,7 @@ import { load } from 'cheerio';
 import axios from 'axios';
 import { YoutubeTranscript } from 'youtube-transcript';
 import PDFParser from 'pdf2json';
+import { string } from "zod";
 
 interface PDFExtractResult {
     text: string;
@@ -16,6 +17,7 @@ export class ContentProcessorService {
         urls?: string[],
         userId: string, 
         testId?: string,
+        conversationid?:string,
         metadata?: any,
         
     }) {

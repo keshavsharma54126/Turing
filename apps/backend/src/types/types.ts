@@ -35,3 +35,9 @@ export const submitTestSchema = z.object({
     incorrectAnswers:z.number(),
     skippedAnswers:z.number()
 })
+
+export  const addContextSchema = z.object({
+    pdfUrl:z.array(z.string()).default([]),
+    urls:z.array(z.string()).default([]),
+    conversationId:z.string()
+})

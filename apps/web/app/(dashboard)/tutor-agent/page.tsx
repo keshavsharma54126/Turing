@@ -1,109 +1,176 @@
 "use client"
-import { useEffect, useState } from 'react';
+
+import { useState, useEffect } from 'react';
+import { MessageSquarePlus, Loader2, Trash2 } from 'lucide-react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+
+interface Conversation {
+  id:string,
+  userId:string,
+  topic:string,
+  message:[]
+  createdAt:Date
+}
+
 const TutorAgent = () => {
-  const [question, setQuestion] = useState('');
-  const [context, setContext] = useState('');
-  const [response, setResponse] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [chatHistory, setChatHistory] = useState<Array<{type: 'user' | 'ai', content: string}>>([]);
-  const router = useRouter();
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
+  const [topic, setTopic] = useState('');
+  const router = useRouter()
 
-  useEffect(()=>{
-    let token = '';
-    if(typeof window !== 'undefined'){
-      token = localStorage.getItem('authToken')!;
-    }
-    if(!token){
-      router.push('/signin');
-    }
-  },[router])
-
-  const handleAskQuestion = async () => {
-    if (!question.trim()) return;
-    
-    setIsLoading(true);
-    setChatHistory(prev => [...prev, { type: 'user', content: question }]);
-
-    try {
-      let token;
-      if(typeof window !== 'undefined'){
-        token = localStorage.getItem('authToken');
+  useEffect(() => {
+    const fetchConversations = async () => {
+      try {
+        let token= ''
+        if(typeof Window !==undefined ){
+          token = localStorage.getItem("authToken") as string
+        }
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/conversation`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        setConversations(response.data.conversations);
+      } catch (error) {
+        console.error('Error fetching conversations:', error);
       }
+    };
 
-        const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/conversations/tutor`,
-        { question, context },
+    fetchConversations();
+  }, []);
+
+  const handleStartConversation = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/conversations/newSession`,
+        {
+          topic
+        },
         {
           headers: {
-            Authorization: `Bearer ${token}}`,
-          },
+            Authorization: `Bearer ${token}`
+          }
         }
       );
-      
-      setResponse(response.data.answer);
-      setChatHistory(prev => [...prev, { type: 'ai', content: response.data.answer }]);
-      setQuestion('');
+      const fetchConversations = async () => {
+        try {
+          let token= ''
+          if(typeof Window !==undefined ){
+            token = localStorage.getItem("authToken") as string
+          }
+          const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/conversation`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          setConversations(response.data.conversations);
+        } catch (error) {
+          console.error('Error fetching conversations:', error);
+        }
+      };
+  
+      fetchConversations();
+
     } catch (error) {
-      console.error('Error getting tutor response:', error);
+      console.error('Error creating conversation:', error);
     }
-    setIsLoading(false);
+    setLoading(false);
   };
 
-  return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-8">AI Tutor</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="brutalist-card bg-white p-6">
-          <h2 className="text-xl font-bold mb-4">Learning Context</h2>
-          <textarea
-            className="w-full p-4 border-2 border-[#1B4D3E] font-mono mb-4 min-h-[200px]"
-            value={context}
-            onChange={(e) => setContext(e.target.value)}
-            placeholder="Optional: Add any relevant learning materials or context..."
-          />
-        </div>
+  const navigateToConversation  = (conversation:Conversation)=>{
+    setSelectedConversation(conversation.id) 
+    router.push(`/${conversation.id}`)
+  }
 
-        <div className="brutalist-card bg-white p-6">
-          <h2 className="text-xl font-bold mb-4">Ask a Question</h2>
-          <textarea
-            className="w-full p-4 border-2 border-[#1B4D3E] font-mono mb-4"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-            placeholder="What would you like to learn about?"
-          />
-          
-          <button
-            onClick={handleAskQuestion}
-            disabled={isLoading}
-            className="brutalist-button bg-[#1B4D3E] text-white px-6 py-3 w-full"
-          >
-            {isLoading ? 'Thinking...' : 'Ask Question'}
-          </button>
-        </div>
+  const handleDeleteConversation = async (e: React.MouseEvent, conversationId: string) => {
+    e.stopPropagation(); // Prevent navigation when clicking delete
+    try {
+      const token = localStorage.getItem('authToken');
+      setConversations(prev => prev.filter(conv => conv.id !== conversationId));
+      const res = await axios.delete(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/conversations/${conversationId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      console.log(res.data.message)
+
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-6 max-w-4xl">
+      {/* Topic Input Section */}
+      <div className="mb-6">
+        <label htmlFor="topic" className="block text-lg font-medium text-gray-700 mb-2">
+          What would you like to learn about?
+        </label>
+        <input
+          type="text"
+          id="topic"
+          value={topic}
+          onChange={(e) => setTopic(e.target.value)}
+          placeholder="Enter a topic (e.g., 'JavaScript Promises' or 'React Hooks')"
+          className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-[#31a783] focus:ring-2 focus:ring-[#31a783] focus:ring-opacity-50 outline-none transition-colors font-mono"
+        />
       </div>
 
-      {chatHistory.length > 0 && (
-        <div className="brutalist-card bg-white p-6 mt-8">
-          <h2 className="text-xl font-bold mb-4">Conversation</h2>
-          <div className="space-y-4">
-            {chatHistory.map((msg, idx) => (
-              <div
-                key={idx}
-                className={`p-4 rounded-lg ${
-                  msg.type === 'user' 
-                    ? 'bg-[#E0F4FF] ml-auto max-w-[80%]' 
-                    : 'bg-[#F7CAC9] mr-auto max-w-[80%]'
-                }`}
-              >
-                <p className="font-mono whitespace-pre-wrap">{msg.content}</p>
+      <button
+        onClick={handleStartConversation}
+        disabled={!topic.trim()}
+        className={`w-full brutalist-button ${
+          topic.trim() 
+            ? 'bg-[#31a783] hover:bg-[#42bba3]' 
+            : 'bg-gray-400 cursor-not-allowed'
+        } text-white px-4 py-3 flex items-center justify-center gap-2 mb-6 transition-colors`}
+      >
+        <MessageSquarePlus size={20} />
+        <span className="font-mono">Start Learning About {topic || '...'}</span>
+      </button>
+
+      {/* Conversations List */}
+      <div className="space-y-4 overflow-y-auto h-screen">
+        {conversations.map((conversation:Conversation) => (
+          <div
+            key={conversation.id}
+            onClick={()=> navigateToConversation(conversation)}
+            className={`p-4 cursor-pointer hover:bg-[#42bba3] transition-colors rounded-lg border ${
+              selectedConversation === conversation.id ? 'bg-[#31a783] text-white' : 'bg-white'
+            }`}
+          >
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="font-bold mb-1 truncate">{conversation.topic}</h3>
+                <span className="text-xs text-gray-500">
+                  {new Date(conversation.createdAt).toLocaleDateString()}
+                </span>
               </div>
-            ))}
+              <button
+                onClick={(e) => handleDeleteConversation(e, conversation.id)}
+                className="p-2 hover:bg-red-100 rounded-full transition-colors"
+              >
+                <Trash2 size={18} className="text-red-500" />
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        ))}
+      </div>
     </div>
   );
 };

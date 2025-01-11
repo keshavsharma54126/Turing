@@ -13,7 +13,6 @@ testRouter.post("/generate-test", authMiddleware, async(req:any, res:any) => {
         }
 
         const parsedBody = testSchema.parse(req.body);
-        console.log("Parsed body:", parsedBody);
 
         const {title, topic, difficulty, numQuestions, pdfUrl, urls} = parsedBody;
         const pdfUrlArray = Array.isArray(pdfUrl) ? pdfUrl : [];
@@ -31,8 +30,6 @@ testRouter.post("/generate-test", authMiddleware, async(req:any, res:any) => {
                 isCompleted: false,
             }
         });
-
-        console.log("Test created:", test);
 
        const contentProcessingResult = await ContentProcessorService.processContent({
             userId: req.userId,
@@ -52,7 +49,6 @@ testRouter.post("/generate-test", authMiddleware, async(req:any, res:any) => {
                 questions
             }
         })
-        console.log("Test created");
         return res.status(200).json({test})
    } catch(e) {
         console.error("Detailed error:", e);

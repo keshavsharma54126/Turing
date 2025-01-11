@@ -1,5 +1,5 @@
 import Router from "express";
-import { prisma,VectorService, GeminiService } from "@repo/db/client";
+import { prisma } from "@repo/db/client";
 import { authMiddleware } from "../middleware/authMiddleware";
 export const userRouter = Router();
 
@@ -29,3 +29,26 @@ userRouter.get("/tests/:id",authMiddleware, async(req:any, res:any) => {
         return res.status(500).json({message:"Internal server error",error})
     }
 });
+userRouter.get("/conversation",authMiddleware,async(req:any,res:any)=>{
+    try{
+        console.log("h")
+        const conversations  = await prisma.conversation.findMany({
+          where: {
+            userId: req.userId
+          },
+          orderBy: {
+            createdAt: 'desc'
+          }
+        })
+        console.log(conversations)
+
+            return res.status(200).json({
+                conversations
+            })
+        
+    }catch(err){
+        return res.status(500).json({
+            message:"Internal server error",err
+        })
+    }
+})

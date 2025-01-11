@@ -91,6 +91,8 @@ model Conversation {
   userId    String   @map("user_id") 
   topic     String    
   messages  Json?
+  pdfUrl    String[]
+  url       String[]
   resources Resource[] @relation("ConversationResources")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
