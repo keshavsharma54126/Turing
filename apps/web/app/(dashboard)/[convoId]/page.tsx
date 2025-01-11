@@ -6,8 +6,20 @@ import { Dropbox } from '@repo/ui/dropbox';
 import { LinkIcon } from 'lucide-react';
 import { useParams } from 'next/navigation';
 
+interface conversation{
+
+}
+
+interface ChatMessage {
+  type: 'user' | 'ai';
+  content: string;
+  isLoading?: boolean;
+  isStreaming?: boolean;
+}
+
 const TutorAgent = () => {
   const [pdfUrls,setPdfUrls] = useState<string[]>([])
+  const[conversation,setConversation] = useState<any>({})
   const[referenceLinks, setReferenceLinks] = useState<string>();
   const[urls, setUrls] = useState<string[]>([]);
   const[hasSubmitted,setHasSubmitted] = useState(false)
@@ -15,10 +27,11 @@ const TutorAgent = () => {
   const [context, setContext] = useState('');
   const [response, setResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const[memory,setMemory] = useState<string>("")
-  const [chatHistory, setChatHistory] = useState<Array<{type: 'user' | 'ai', content: string}>>([]);
+  const[memory,setMemory] = useState<string>("currently no memory")
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const router = useRouter();
   const params = useParams()
+  const [responseLoading,setResponseLoading] = useState(false)
   const convoId = params.convoId
 
   useEffect(()=>{
@@ -39,11 +52,12 @@ const TutorAgent = () => {
             }
           }
         );
-        if(res.status===200){
+        setConversation(res.data.conversation)
+        if(res.status===200 && (res.data.conversation.pdfUrl || res.data.conversation.url) ){
           setMemory("Memory Updated Successfully")
         }
         else{
-          setMemory("Could Not Update Memory")
+          setMemory("Could not update Memory")
         }
       }catch(err){
         console.error("error while getting resources",err)
@@ -119,32 +133,91 @@ const TutorAgent = () => {
   const handleAskQuestion = async () => {
     if (!question.trim()) return;
     
-    setIsLoading(true);
     setChatHistory(prev => [...prev, { type: 'user', content: question }]);
+    setChatHistory(prev => [...prev, { 
+      type: 'ai', 
+      content: '', 
+      isLoading: true,
+      isStreaming: true 
+    }]);
 
     try {
-      let token;
-      if(typeof window !== 'undefined'){
-        token = localStorage.getItem('authToken');
-      }
-
-        const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/conversations/tutor`,
-        { question, context },
-        {
-          headers: {
-            Authorization: `Bearer ${token}}`,
-          },
-        }
-      );
-      
-      setResponse(response.data.answer);
-      setChatHistory(prev => [...prev, { type: 'ai', content: response.data.answer }]);
       setQuestion('');
+        let token = localStorage.getItem("authToken") as string;
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/conversations/chat-stream`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                question,
+                conversationId: convoId
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const reader = response.body?.getReader();
+        if (!reader) {
+            throw new Error('No reader available');
+        }
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+                setChatHistory((prev:any) => {
+                    const newHistory = [...prev];
+                    const lastMessage = newHistory[newHistory.length - 1];
+                    return [...prev.slice(0, -1), { 
+                        ...lastMessage, 
+                        isLoading: false,
+                        isStreaming: false 
+                    }];
+                });
+                break;
+            }
+
+            // Decode the chunk
+            const text = new TextDecoder().decode(value);
+            let buffer = ''
+            const lines = text.split('\n');
+            for (const line of lines) {
+               if(line.trim()==='')continue
+                    try {
+                      console.log(line)
+                      buffer+=line
+                        const data = JSON.parse(buffer)
+                        console.log(data)
+                        // Update immediately with just the new chunk
+                        setChatHistory(prev => {
+                            const newHistory = [...prev];
+                            const lastMessage = newHistory[newHistory.length - 1];
+                            newHistory[newHistory.length - 1] = {
+                                type: 'ai',
+                                content: lastMessage?.content + data.text
+                            };
+                            return newHistory;
+                        });
+                    } catch (e) {
+                        console.error('Error parsing chunk:', e);
+                    }
+                
+            }
+        }
     } catch (error) {
-      console.error('Error getting tutor response:', error);
+        console.error('Error:', error);
+        setChatHistory(prev => {
+            const newHistory = [...prev];
+            newHistory[newHistory.length - 1] = {
+                type: 'ai',
+                content: 'Sorry, an error occurred.',
+            };
+            return newHistory;
+        });
     }
-    setIsLoading(false);
   };
 
   if(isLoading){
@@ -163,7 +236,7 @@ const TutorAgent = () => {
   return (
     <div className="p-2 max-w-[1920px] mx-auto overflow-y-auto max-h-screen">
       <div className="flex items-center justify-between mb-2 p-2 bg-white brutalist-card">
-        <h2 className="text-3xl font-bold">AI Tutor</h2>
+        <h2 className="text-3xl font-bold">{conversation?.topic}</h2>
         <button 
           onClick={() => router.push('/tutor-agent')} 
           className="brutalist-button bg-[#1B4D3E] text-white px-4 py-2 flex items-center gap-2"
@@ -272,16 +345,37 @@ const TutorAgent = () => {
               </div>
             ) : (
               <div className="space-y-4 flex-1 overflow-y-auto pb-4 max-h-screen">
-                {chatHistory.map((msg, idx) => (
+                {chatHistory.map((message, index) => (
                   <div
-                    key={idx}
-                    className={`p-4 rounded-lg ${
-                      msg.type === 'user' 
-                        ? 'bg-[#E0F4FF] ml-auto max-w-[80%]' 
-                        : 'bg-[#F7CAC9] mr-auto max-w-[80%]'
+                    key={index}
+                    className={`flex ${
+                      message.type === 'user' ? 'justify-end' : 'justify-start'
                     }`}
                   >
-                    <p className="font-mono whitespace-pre-wrap">{msg.content}</p>
+                    <div
+                      className={`max-w-[70%] rounded-lg p-4 ${
+                        message.type === 'user'
+                          ? 'bg-[#1B4D3E] text-white'
+                          : 'bg-gray-100 text-gray-800'
+                      } ${message.isStreaming ? 'animate-pulse' : ''}`}
+                    >
+                      {message.isStreaming ? (
+                        <div className="flex items-center space-x-2">
+                          <div className="w-2 h-2 bg-[#1B4D3E] rounded-full animate-bounce" 
+                               style={{ animationDelay: '0ms' }}></div>
+                          <div className="w-2 h-2 bg-[#1B4D3E] rounded-full animate-bounce" 
+                               style={{ animationDelay: '150ms' }}></div>
+                          <div className="w-2 h-2 bg-[#1B4D3E] rounded-full animate-bounce" 
+                               style={{ animationDelay: '300ms' }}></div>
+                        </div>
+                      ) : (
+                        <div className="prose prose-sm max-w-none">
+                          {message.content.split('\n').map((line, i) => (
+                            <p key={i} className="mb-2">{line}</p>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

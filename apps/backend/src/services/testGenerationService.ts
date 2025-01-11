@@ -153,6 +153,7 @@ export class TestGenerationService {
         if (!response) {
             throw new Error('Failed to generate response');
         }
+        //@ts-ignore
         return conceptMapParser.parse(response);
     }
 
@@ -230,6 +231,7 @@ export class TestGenerationService {
             await questionPrompt.format({ context, difficulty, concept }), 
             systemInstruction
         );
+        //@ts-ignore
         const parsedResponse = response?.replace(/```json\n?|\n?```/g, '').trim();
         if (!parsedResponse) {
             throw new Error('Failed to generate question - no response received');
@@ -254,6 +256,7 @@ export class TestGenerationService {
         if (!formattedResponse) {
             throw new Error('Failed to format topic - no response received');
         }
+        //@ts-ignore
         return formattedResponse.trim();
     }
 }

@@ -30,10 +30,28 @@ export class GeminiService {
             systemInstruction: systemInstruction
         });
         const result = await model.generateContent(text);
-        const content = await result.response.text();
-        return content;
+        return result
        }catch(e){
         console.error("error while generating responses from gemini",e)
        }
+    }
+
+    static async genertaeStreamedResponse(text:string,systemInstruction:string){
+        try{
+            const model = geminiClient.getGenerativeModel({
+                model: "gemini-1.5-pro",
+                generationConfig: {
+                    temperature: 0.3,
+                    topP: 0.95,
+                    topK: 40,
+                },
+                systemInstruction: systemInstruction
+            });
+            const result = await model.generateContentStream(text)
+            return result
+        }catch(e){
+            console.error("error while generatting and streaming that response from gemini")
+            throw e
+        }
     }
 }

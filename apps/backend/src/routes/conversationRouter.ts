@@ -1,5 +1,5 @@
 import Router from "express";
-import { prisma } from "@repo/db/client";
+import { GeminiService, prisma, VectorService } from "@repo/db/client";
 import { authMiddleware } from "../middleware/authMiddleware";
 import { addContextSchema } from "../types/types";
 import { ContentProcessorService } from "../services/contentProcessingService";
@@ -13,6 +13,10 @@ conversationRouter.get("/:convoid",authMiddleware,async(req:any,res:any)=>{
             where: {
                 id: convoid
             },
+            include:{
+                resources:true
+            }
+            
         })
         console.log(conversation)
         if(!conversation){
@@ -131,6 +135,41 @@ conversationRouter.post("/addContext",authMiddleware,async(req:any,res:any)=>{
     }catch(err){
         return res.status(500).json({
             message:"could not add context",err
+        })
+    }
+})
+
+conversationRouter.post("/chat-stream",authMiddleware,async(req:any,res:any)=>{
+    try{
+        const{question,conversationId} = req.body;
+        const relevantContext  = await VectorService.searchSimilarResourcess(question,20,0.7,conversationId)
+        console.log(relevantContext)
+
+        const contextString = relevantContext && Array.isArray(relevantContext) 
+            ? relevantContext.map((doc: any) => doc.content).join('\n\n')
+            : '';
+
+        res.setHeader("Content-Type", "text/event-stream")
+        res.setHeader("Cache-Control", "no-cache")
+        res.setHeader("Connection", "keep-alive")
+
+        const stream = await GeminiService.genertaeStreamedResponse(question,`
+            You are a helpful AI tutor. Use this context  answer the question,here is the given context:${contextString}
+            and if the context String is empty then answer fro your own knowledge base please for the relevant topic
+            `)
+
+        const streamResponse = stream.stream
+        for await (const chunk of streamResponse) {
+            const text = chunk.text();
+            res.write(`${JSON.stringify({text})}\n\n`);
+        }
+
+        res.end()
+
+    }catch(err){
+        console.error("error in chat stream",err)
+        return res.status(500).json({
+            error:"Stream processing failed"
         })
     }
 })

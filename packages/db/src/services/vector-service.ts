@@ -71,4 +71,25 @@ export class VectorService {
             LIMIT ${limit};
         `;
     }
+
+    static async searchSimilarResourcess(query: string, limit: number = 5, similarityThreshold: number = 0.8, conversationId?: string) {
+        const queryEmbedding = await this.generateEmbedding(query);
+        
+        return prisma.$queryRaw`
+            SELECT 
+                id, 
+                user_id as "userId",
+                content, 
+                metadata,
+                test_id as "testId",
+                conversation_id as "conversationId",
+                1 - (embedding <=> ${queryEmbedding}::vector) as similarity
+            FROM resources
+            WHERE 1 - (embedding <=> ${queryEmbedding}::vector) >= ${similarityThreshold}
+                ${conversationId ? Prisma.sql`AND conversation_id = ${conversationId}` : Prisma.sql``}
+            ORDER BY embedding <=> ${queryEmbedding}::vector
+            LIMIT ${limit};
+        `;
+    }
+
 }
