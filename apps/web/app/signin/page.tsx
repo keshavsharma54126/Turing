@@ -97,21 +97,6 @@ export default function SignIn() {
                   />
                 </div>
   
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="remember"
-                      className="h-4 w-4 border-2 border-gray-800"
-                    />
-                    <label htmlFor="remember" className="ml-2 text-sm">
-                      Remember me
-                    </label>
-                  </div>
-                  <Link href="/forgot-password" className="text-sm text-[#FF6B6B] hover:text-[#FF8C66]">
-                    Forgot password?
-                  </Link>
-                </div>
   
                 <button
                   type="submit"
