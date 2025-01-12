@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { Dropbox } from '@repo/ui/dropbox';
@@ -29,6 +29,7 @@ const TutorAgent = () => {
   const [isLoading, setIsLoading] = useState(false);
   const[memory,setMemory] = useState<string>("currently no memory")
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const useChatRef = useRef<ChatMessage[]>()
   const router = useRouter();
   const params = useParams()
   const [responseLoading,setResponseLoading] = useState(false)
@@ -53,11 +54,12 @@ const TutorAgent = () => {
           }
         );
         setConversation(res.data.conversation)
-        if(res.status===200 && (res.data.conversation.pdfUrl || res.data.conversation.url) ){
+        setChatHistory(res.data.conversation.messages)
+        if(res.status===200 ){
           setMemory("Memory Updated Successfully")
         }
         else{
-          setMemory("Could not update Memory")
+          setMemory("Currently there is no memory for this conversation")
         }
       }catch(err){
         console.error("error while getting resources",err)
@@ -108,7 +110,7 @@ const TutorAgent = () => {
     try {
       let token = "";
      if(typeof window !== 'undefined'){
-      token = localStorage.getItem("authToken")!;
+      token = localStorage.getItem("authToken") as string
      }
       const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/conversations/addContext`,{
         pdfUrl: pdfUrls,
@@ -140,10 +142,11 @@ const TutorAgent = () => {
       isLoading: true,
       isStreaming: true 
     }]);
-
+    useChatRef.current = useChatRef.current ? [...useChatRef.current, {type:'user', content:question}] : [{type:'user', content:question}];
     try {
       setQuestion('');
-        let token = localStorage.getItem("authToken") as string;
+      const token = localStorage.getItem("authToken") as string;
+
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/conversations/chat-stream`, {
             method: 'POST',
             headers: {
@@ -164,6 +167,7 @@ const TutorAgent = () => {
         if (!reader) {
             throw new Error('No reader available');
         }
+        let messageString =''
 
         while (true) {
             const { done, value } = await reader.read();
@@ -176,7 +180,10 @@ const TutorAgent = () => {
                         isLoading: false,
                         isStreaming: false 
                     }];
+
+
                 });
+
                 break;
             }
 
@@ -184,6 +191,7 @@ const TutorAgent = () => {
             const text = new TextDecoder().decode(value);
             let buffer = ''
             const lines = text.split('\n');
+
             for (const line of lines) {
                if(line.trim()==='')continue
                     try {
@@ -191,6 +199,8 @@ const TutorAgent = () => {
                       buffer+=line
                         const data = JSON.parse(buffer)
                         console.log(data)
+                        messageString+=data.text
+
                         // Update immediately with just the new chunk
                         setChatHistory(prev => {
                             const newHistory = [...prev];
@@ -201,12 +211,18 @@ const TutorAgent = () => {
                             };
                             return newHistory;
                         });
+
+                       
                     } catch (e) {
                         console.error('Error parsing chunk:', e);
                     }
                 
             }
+
         }
+        useChatRef.current = [...useChatRef.current,{type:'ai',content:messageString}]   
+        console.log(useChatRef.current)
+        await sendChatHistoryToBackend(useChatRef.current)
     } catch (error) {
         console.error('Error:', error);
         setChatHistory(prev => {
@@ -219,6 +235,25 @@ const TutorAgent = () => {
         });
     }
   };
+
+  const sendChatHistoryToBackend = async (chatHistory: ChatMessage[]) => {
+    try {
+
+      const token= localStorage.getItem("authToken") as string
+      
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/conversations/updateChatHistory`, {
+        conversationId: convoId,
+        chatHistory: chatHistory
+      },{
+        headers:{
+          Authorization:`Bearer ${token}`
+        }
+      });
+      console.log(response.data)
+    } catch (error) {
+      console.error('Error updating chat history:', error);
+    }
+  }
 
   if(isLoading){
     return (
@@ -334,7 +369,11 @@ const TutorAgent = () => {
             <div className="border-b border-gray-200 pb-4 mb-6">
               <h2 className="text-xl font-bold mb-2">Conversation</h2>
               {memory && (
-                <p className="text-sm text-gray-600 font-medium bg-green-50 px-3 py-2 rounded-md border border-green-200">
+                <p className={`text-sm font-medium px-3 py-2 rounded-md border ${
+                  memory === "Currently there is no memory for this conversation"
+                    ? "bg-red-50 text-red-600 border-red-200"
+                    : "bg-green-50 text-green-600 border-green-200"
+                }`}>
                   {memory}
                 </p>
               )}

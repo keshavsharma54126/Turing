@@ -45,6 +45,8 @@ export class ContentProcessorService {
 
         return {
             success: true,
+            testId: content.testId,
+            conversationId: content.conversationid,
             message: "Content processed successfully"
         };
     }

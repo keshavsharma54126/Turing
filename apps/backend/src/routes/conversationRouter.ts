@@ -13,8 +13,14 @@ conversationRouter.get("/:convoid",authMiddleware,async(req:any,res:any)=>{
             where: {
                 id: convoid
             },
-            include:{
-                resources:true
+            select:{
+                id:true,
+                userId:true,
+                pdfUrl:true,
+                url:true,
+                messages:true,
+                resources:true,
+                
             }
             
         })
@@ -99,7 +105,7 @@ conversationRouter.post("/addContext",authMiddleware,async(req:any,res:any)=>{
             pdfUrls: pdfUrl ,
             urls: urls 
         })
-        console.log(conversationId)
+        console.log(contentProcessingResult)
         const conversation = await prisma.conversation.findUnique({
             where:{
                 id:conversationId
@@ -168,6 +174,55 @@ conversationRouter.post("/chat-stream",authMiddleware,async(req:any,res:any)=>{
         console.error("error in chat stream",err)
         return res.status(500).json({
             error:"Stream processing failed"
+        })
+    }
+})
+
+conversationRouter.post("/updateChatHistory",authMiddleware,async(req:any,res:any)=>{
+    try{
+        const {chatHistory,conversationId} = req.body;
+        console.log(chatHistory)
+        if(!chatHistory){
+            return res.status(400).json({
+                message:"chat history is not present"
+            })
+        }
+        const conversation  = await prisma.conversation.findUnique({
+            where:{
+                id:conversationId
+            }
+        })
+
+        if(!conversation){
+            return res.status(400).json({
+                message:"no conversation found with the given conversation Id"
+            })
+        }
+
+        const messages = Array.isArray(conversation.messages) ? conversation.messages : [];
+        const newMessages = Array.isArray(chatHistory) ? [...messages, ...chatHistory] : messages;
+
+        const response = await prisma.conversation.update({
+            where:{
+                id:conversationId
+            },
+            data:{
+                messages:newMessages
+            }
+        })
+        if(!response){
+            return res.status(400).json({
+                messages:"could not uddate messages with chathistory"
+            })
+        }
+        return res.status(200).json({
+            messages:"updated chat messages with the chat history",
+            response
+        })
+    }catch(err){
+        console.error("could not update chathistory",err)
+        return res.status(500).json({
+            error:"could not update chat history",err
         })
     }
 })
