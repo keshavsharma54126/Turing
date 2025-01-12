@@ -15,16 +15,21 @@ conversationRouter.get("/:convoid",authMiddleware,async(req:any,res:any)=>{
             },
             select:{
                 id:true,
+                topic:true,
                 userId:true,
                 pdfUrl:true,
                 url:true,
                 messages:true,
-                resources:true,
+                resources:{
+                    select:{
+                        id:true,
+                        content:true,
+                    }
+                },
                 
             }
             
         })
-        console.log(conversation)
         if(!conversation){
             return res.status(200).json({
                 message:"errro while getting resources for conversation"
@@ -145,22 +150,38 @@ conversationRouter.post("/addContext",authMiddleware,async(req:any,res:any)=>{
 
 conversationRouter.post("/chat-stream",authMiddleware,async(req:any,res:any)=>{
     try{
-        const{question,conversationId} = req.body;
+        const{question,conversationId,chatHistory} = req.body;
         const relevantContext  = await VectorService.searchSimilarResourcesByConversation(question,5,0.6,conversationId)
-        console.log(relevantContext)
+        
 
         const contextString = relevantContext && Array.isArray(relevantContext) 
             ? relevantContext.map((doc: any) => doc.content).join('\n\n')
             : '';
 
+        const systemPrompt = `You are an intelligent and helpful AI tutor focused on providing clear, accurate explanations.
+
+            Instructions:
+            - Use the provided context to answer the question accurately
+            - If the context doesn't contain enough information, say so
+            - Break down complex concepts into simpler terms
+            - Use examples when helpful
+            - Stay focused on the question asked
+            - Cite specific parts of the context when relevant
+            -I am also provigin you with the chat history in the context .with user answers and "ai" answers that are you answers so please keep thos in mind and then answer .
+            -if there  is no context given then explicity tell the user that there is no context for this and would ask them if they would like for you to use your own knowledgebase of not.
+            -If they say yes then use your own knowledge base to answer the question
+            -if they say no then doh't .
+
+            Context:
+            ${contextString+JSON.stringify(chatHistory)}
+
+            Remember to be concise yet thorough in your explanations.`;
+
         res.setHeader("Content-Type", "text/event-stream")
         res.setHeader("Cache-Control", "no-cache")
         res.setHeader("Connection", "keep-alive")
 
-        const stream = await GeminiService.genertaeStreamedResponse(question,`
-            You are a helpful AI tutor. Use this context  answer the question,here is the given context:${contextString}
-            and if the context String is empty then answer fro your own knowledge base please for the relevant topic
-            `)
+        const stream = await GeminiService.genertaeStreamedResponse(question, systemPrompt);
 
         const streamResponse = stream.stream
         for await (const chunk of streamResponse) {

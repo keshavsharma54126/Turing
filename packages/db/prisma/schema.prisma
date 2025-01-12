@@ -34,17 +34,17 @@ model User {
 }
 
 model Resource {
-  id        String   @id @default(cuid())
-  userId    String   @map("user_id")
-  content   String
-  metadata  Json?
-  testId    String?  @map("test_id")
-  embedding Unsupported("vector(768)")
-  test      Test?    @relation("TestResources", fields: [testId], references: [id])
-  conversationId String? @map("conversation_id")
-  conversation Conversation? @relation("ConversationResources", fields: [conversationId], references: [id])
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id              String       @id @default(cuid())
+  userId          String       @map("user_id")
+  content         String
+  metadata        Json?
+  testId          String?      @map("test_id")
+  embedding       Unsupported("vector(768)")
+  test            Test?       @relation("TestResources", fields: [testId], references: [id], onDelete: Cascade)
+  conversationId  String?      @map("conversation_id")
+  conversation    Conversation? @relation("ConversationResources", fields: [conversationId], references: [id], onDelete: Cascade)
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
 
   @@map("resources")
 }
@@ -87,7 +87,7 @@ model TestResult {
 }
 
 model Conversation {
-  id        String   @id @default(cuid())
+  id        String   @id @default(cuid()) @map("conversation_id")
   userId    String   @map("user_id") 
   topic     String    
   messages  Json[]

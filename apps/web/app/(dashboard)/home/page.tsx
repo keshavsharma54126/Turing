@@ -47,6 +47,57 @@ interface UserStats {
   learningStreak: number;
 }
 
+const calculateStreak = (tests: any[]) => {
+  if (!tests.length) return 0;
+  
+  const today = new Date();
+  const dates = tests
+    .map(test => new Date(test.createdAt))
+    .sort((a, b) => b.getTime() - a.getTime());
+  
+  let streak = 1;
+  //@ts-ignore
+  let currentDate = new Date(dates[0]);
+  
+  // If no activity today or yesterday, streak is broken
+  if ((today.getTime() - currentDate.getTime()) > (2 * 24 * 60 * 60 * 1000)) {
+    return 0;
+  }
+
+  for (let i = 1; i < dates.length; i++) {
+    //@ts-ignore
+    const prevDate = new Date(dates[i]);
+    const diffDays = Math.floor((currentDate.getTime() - prevDate.getTime()) / (24 * 60 * 60 * 1000));
+    
+    if (diffDays === 1) {
+      streak++;
+      currentDate = prevDate;
+    } else {
+      break;
+    }
+  }
+  
+  return streak;
+};
+
+const getSubjectDistribution = (tests: any[]) => {
+  const distribution: { [key: string]: number } = {};
+  
+  tests.forEach(test => {
+    const topic = test.topic;
+    console.log(topic)
+    distribution[topic] = (distribution[topic] || 0) + 1;
+  });
+  console.log({
+    labels:Object.keys(distribution),
+    data:Object.values(distribution)
+  })
+  return  {
+    labels: Object.keys(distribution),
+    data: Object.values(distribution)
+  };
+};
+
 const Home = () => {
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [userStats, setUserStats] = useState<UserStats>({
@@ -67,21 +118,42 @@ const Home = () => {
             router.push('/signin');
           }
         }
-        const [testsResponse, statsResponse] = await Promise.all([
-          axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/tests/history`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }),
-          axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/stats`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          })
-        ]);
 
-        setTestResults(testsResponse.data);
-        setUserStats(statsResponse.data);
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/getUserData`,{
+          headers:{
+            Authorization:`Bearer ${token}`
+          }
+        });
+
+        const userData = response.data.userData;
+        
+        const tests = userData.tests || [];
+        const conversations = userData.conversations || [];
+ 
+        
+        const completedTests = tests.filter((test: any) => test.results && test.results.length > 0);
+        const averageScore = completedTests.length > 0 
+          ? completedTests.reduce((acc: number, test: any) => 
+              acc + (test.results[0].score || 0), 0) / completedTests.length
+          : 0;
+
+        const testResults = completedTests.map((test: any) => ({
+          id: test.id,
+          title: test.title,
+          topic:test.topic,
+          score: test.results[0].score || 0,
+          totalQuestions: test.numQuestions,
+          date: test.createdAt
+        }));
+
+        setTestResults(testResults);
+        setUserStats({
+          testsCompleted: completedTests.length,
+          averageScore: Math.round(averageScore),
+          tutoringSessions: conversations.length,
+          learningStreak: calculateStreak(tests)
+        });
+
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
@@ -97,6 +169,27 @@ const Home = () => {
     { icon: <GraduationCap size={24} />, label: 'Tutoring Sessions', value: userStats.tutoringSessions },
     { icon: <Calendar size={24} />, label: 'Learning Streak', value: `${userStats.learningStreak} days` },
   ];
+
+  const subjectData = getSubjectDistribution(testResults);
+
+  if (isLoading) {
+    return (
+      <div className="p-6 max-w-7xl mx-auto">
+        <div className="animate-pulse space-y-8">
+          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-32 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="h-[300px] bg-gray-200 rounded"></div>
+            <div className="h-[300px] bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 max-w-7xl mx-auto overflow-y-auto h-screen">
@@ -119,9 +212,8 @@ const Home = () => {
         ))}
       </div>
 
-      {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Progress Over Time */}
+
         <div className="brutalist-card bg-white p-6">
           <h2 className="text-xl font-bold mb-4">Learning Progress</h2>
           <div className="h-[300px]">
@@ -156,9 +248,9 @@ const Home = () => {
           <div className="h-[300px]">
             <Doughnut
               data={{
-                labels: ['Mathematics', 'Science', 'History', 'Language'],
+                labels: subjectData.labels,
                 datasets: [{
-                  data: [30, 25, 20, 25],
+                  data: subjectData.data,
                   backgroundColor: [
                     '#B8D8E3',
                     '#F7CAC9',
@@ -196,15 +288,15 @@ const Home = () => {
                   <td className="p-4">{new Date(test.date).toLocaleDateString()}</td>
                   <td className="p-4">
                     <span className={`px-2 py-1 rounded ${
-                      (test.score / test.totalQuestions) * 100 >= 70
+                      (test.score / test.totalQuestions*10)>0.7
                         ? 'bg-[#E5FFE0]'
                         : 'bg-[#FFE2E0]'
                     }`}>
-                      {((test.score / test.totalQuestions) * 100).toFixed(1)}%
+                      {((test.score /(test.totalQuestions*10)) * 100).toFixed(1)}%
                     </span>
                   </td>
                   <td className="p-4">
-                    <button className="brutalist-button bg-[#1B4D3E] text-white px-4 py-2">
+                    <button onClick={()=>(router.push(`/test/${test.id}`))} className="brutalist-button bg-[#1B4D3E] text-white px-4 py-2">
                       Review
                     </button>
                   </td>

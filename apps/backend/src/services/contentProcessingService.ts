@@ -26,15 +26,15 @@ export class ContentProcessorService {
             ...content.urls ? content.urls.map(this.extractType) : []
         ]);
 
-        // Combine and chunk content
         const combinedContent = extractedContent.join('\n\n');
         const chunks = this.chunkContent(combinedContent);
 
-        console.log(content.conversationid)
+        console.log(chunks)
+
 
         // Generate embeddings and store in vector store
         for (const chunk of chunks) {
-            await VectorService.createResource({
+            const res = await VectorService.createResource({
                userId: content.userId,
                content: chunk,
                metadata: content.metadata,
@@ -42,6 +42,7 @@ export class ContentProcessorService {
                conversationId: content.conversationid
             });
         }
+        
 
         return {
             success: true,
@@ -60,7 +61,7 @@ export class ContentProcessorService {
         }
     }
 
-    private static async extractFromPDF(url: string): Promise<PDFExtractResult> {
+    private static async extractFromPDF(url: string): Promise<string> {
         try {
             // Fetch PDF from URL
             const response = await axios.get(url, {
@@ -97,8 +98,7 @@ export class ContentProcessorService {
                 // Load the PDF data
                 pdfParser.parseBuffer(response.data);
             });
-
-            return result;
+            return result.text;
 
         } catch (error) {
             console.error(`Error processing PDF from ${url}:`, error);
@@ -109,7 +109,8 @@ export class ContentProcessorService {
     private static async extractFromVideo(url: string): Promise<string> {
         try{
             const transcript = await YoutubeTranscript.fetchTranscript(url);
-            return transcript.map(t => t.text).join(' ');
+            const result =transcript.map(t => t.text).join(' ');
+            return result 
         }
         catch(error){
             console.error(`Error processing video from ${url}:`, error);

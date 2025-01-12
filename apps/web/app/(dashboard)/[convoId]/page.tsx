@@ -53,6 +53,7 @@ const TutorAgent = () => {
             }
           }
         );
+        console.log(res.data.conversation)
         setConversation(res.data.conversation)
         setChatHistory(res.data.conversation.messages)
         if(res.status===200 ){
@@ -155,7 +156,8 @@ const TutorAgent = () => {
             },
             body: JSON.stringify({
                 question,
-                conversationId: convoId
+                conversationId: convoId,
+                chatHistory
             })
         });
 

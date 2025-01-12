@@ -1,6 +1,7 @@
-import Router from "express";
+import Router, { response } from "express";
 import { prisma } from "@repo/db/client";
 import { authMiddleware } from "../middleware/authMiddleware";
+import { AnyZodTuple } from "zod";
 export const userRouter = Router();
 
 userRouter.get("/",authMiddleware, async(req:any, res:any) => {
@@ -49,6 +50,59 @@ userRouter.get("/conversation",authMiddleware,async(req:any,res:any)=>{
     }catch(err){
         return res.status(500).json({
             message:"Internal server error",err
+        })
+    }
+})
+
+userRouter.get("/getUserData",authMiddleware,async(req:any,res:any)=>{
+    try{
+        const userId = req.userId;
+        const userData = await prisma.user.findUnique({
+            where:{
+                id:userId
+            },
+                select:{
+                    email:true,
+                    username:true,
+                    tests:{
+                        select:{
+                            id:true,
+                            title:true,
+                            topic:true,
+                            difficulty:true,
+                            numQuestions:true,
+                            createdAt:true,
+                            results:{
+                                select:{
+                                    id:true,
+                                    score:true,
+                                    correctAnswers:true,
+                                    incorrectAnswers:true,
+                                    skippedAnswers:true,
+                                }
+                            }
+                        }
+                    },
+                    conversations:{
+                        select:{
+                            id:true,
+                            topic:true,
+                            createdAt:true,
+                        }
+                    }
+                }
+        })
+        if(!userData){
+            return res.status(400).json({
+                message:"user does not exist"
+            })
+        }
+        return res.status(200).json({
+            userData
+        })
+    }catch(err){
+        return res.status(500).json({
+            message:"could not retrieve user data for their test ans their tutoring sessions"
         })
     }
 })
