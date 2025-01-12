@@ -118,7 +118,7 @@ export default function SignIn() {
                 </div>
   
                 <div className="mt-6 grid grid-cols-2 gap-4">
-                  <GoogleLoginButton clientId={process?.env?.NEXT_PUBLIC_GOOGLE_CLIENT_ID as string}/>
+                  <GoogleLoginButton clientId="883449637885-trb16ii0jj4qu7bj44mf6c6nqdkomtuh.apps.googleusercontent.com"/>
                   <button className="brutalist-button w-full py-3 bg-[#FF6B6B] hover:bg-[#FF8C66] text-white font-bold flex items-center justify-center">
                     <FaGithub className="mr-2 text-xl" />
                     GitHub
