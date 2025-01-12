@@ -126,8 +126,11 @@ const TestPage = () => {
         }
       })
       setTest(response.data.test)
+      const testQuestions = response.data.test.questions
+      console.log(response.data.test)
+
       setIsSubmitted(true)
-       const {newScore,newCorrectAnswers,totalQuestions,totalAnsweredQuestions} = await evaluateAnswers(userAnswers,test.questions)
+       const {newScore,newCorrectAnswers,totalQuestions,totalAnsweredQuestions} = await evaluateAnswers(userAnswers,testQuestions)
        setScore(newScore)
        setCorrectAnswers(newCorrectAnswers)
        setIncorrectAnswers(totalQuestions-newCorrectAnswers)
@@ -167,23 +170,16 @@ const TestPage = () => {
     let totalQuestions = questions.length
     let totalAnsweredQuestions = Object.keys(userAnswers).length
     console.log(userAnswersArray)
+    console.log(questions)
      for(let i=0;i<questions.length;i++){
-      
+      console.log(userAnswersArray[i].trim(),questions[i].correctAnswer.trim())
         if(userAnswersArray[i]?.trim() === questions[i].correctAnswer?.trim()){
           console.log(userAnswersArray[i].trim(),questions[i].correctAnswer.trim())
             newScore+=10
             newCorrectAnswers+=1
         }
      }
-     console.log(newScore)
-     setUserAnswers((prev:any)=>({...prev,}))
-     setIsSubmitted(true)
-     setCorrectAnswers(correctAnswers)
-     setIncorrectAnswers(questions.length-correctAnswers)
-     setSkippedAnswers(questions.length-Object.keys(userAnswers).length)
-     setAnsweredQuestions(Object.keys(userAnswers).length)
-
-    
+     console.log(newScore,newCorrectAnswers,totalQuestions,totalAnsweredQuestions)
 
      return {newScore,newCorrectAnswers,totalQuestions,totalAnsweredQuestions}
 

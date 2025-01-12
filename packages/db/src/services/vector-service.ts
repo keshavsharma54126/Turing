@@ -66,7 +66,6 @@ export class VectorService {
                 1 - (embedding <=> ${queryEmbedding}::vector) as similarity
             FROM resources
             WHERE 1 - (embedding <=> ${queryEmbedding}::vector) >= ${similarityThreshold}
-            //@ts-ignore
                 ${testId ? Prisma.sql`AND test_id = ${testId}` : Prisma.sql``}
             ORDER BY embedding <=> ${queryEmbedding}::vector
             LIMIT ${limit};
@@ -90,7 +89,6 @@ export class VectorService {
                     1 - (embedding <=> ${queryEmbedding}::vector) as similarity
                 FROM resources
                 WHERE 1 - (embedding <=> ${queryEmbedding}::vector) >= ${similarityThreshold}
-                //@ts-ignore
                 ${conversationId ? Prisma.sql`AND conversation_id = ${conversationId}` : Prisma.sql``}
                 ORDER BY embedding <=> ${queryEmbedding}::vector
                 LIMIT ${limit};

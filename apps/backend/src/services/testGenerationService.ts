@@ -20,11 +20,9 @@ export class TestGenerationService {
             ) as any[];
             relevantDocs.push(...relevantSearch);
         }
-        console.log(formattedKeys);
+        
         // 2. Generate a concept map to identify key topics
         const conceptMap = await TestGenerationService.generateConceptMap(relevantDocs);
-
-        console.log(conceptMap);
 
         // Validate that conceptMap matches our schema
         if (!conceptMap || !Array.isArray(conceptMap.mainConcepts)) {
@@ -181,7 +179,8 @@ export class TestGenerationService {
         `;
         const context = await VectorService.searchSimilarResources(previousQuestion.concept,20,0.7,testId) as any[];
         const contextString = context.map((c:any) => c.content).join('\n');
-        return GeminiService.generateResponse(prompt,contextString);
+        const response = await GeminiService.generateResponse(prompt,contextString);
+        return response
     }
 
     private static async generateQuestion(concept: string, context: string, difficulty: string, prompt: string) {
@@ -232,7 +231,7 @@ export class TestGenerationService {
             systemInstruction
         );
         //@ts-ignore
-        const parsedResponse = response?.replace(/```json\n?|\n?```/g, '').trim();
+        const parsedResponse = response.replace(/```json\n?|\n?```/g, '').trim();
         if (!parsedResponse) {
             throw new Error('Failed to generate question - no response received');
         }
@@ -257,6 +256,6 @@ export class TestGenerationService {
             throw new Error('Failed to format topic - no response received');
         }
         //@ts-ignore
-        return formattedResponse.trim();
+        return formattedResponse
     }
 }
