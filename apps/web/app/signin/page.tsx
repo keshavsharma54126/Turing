@@ -23,16 +23,18 @@ export default function SignIn() {
       router.push('/home');
     }
     setLoading(false)
-  }, [router]);
+  }, []);
 
   const handleSignIn = async () => {
     try{
+      
       if(!email || !password){
         setError('Please fill in all fields');
         return;
       }
       setIsLoading(true);
       const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/signin`, { email, password });
+      console.log(response)
       if(response.status === 200){
         localStorage.setItem('authToken', response.data.token);
         setIsLoading(false);
@@ -68,7 +70,6 @@ export default function SignIn() {
             </div>
   
             <div className="brutalist-card bg-white p-8">
-              <form className="space-y-6">
                 <div>
                   <label htmlFor="email" className="block text-sm font-bold mb-2">
                     Email Address
@@ -99,13 +100,11 @@ export default function SignIn() {
   
   
                 <button
-                  type="submit"
                   onClick={handleSignIn}
                   className="brutalist-button w-full py-3 bg-[#FF6B6B] hover:bg-[#FF8C66] text-white font-bold"
                 >
                   Sign In
                 </button>
-              </form>
   
               <div className="mt-6">
                 <div className="relative">

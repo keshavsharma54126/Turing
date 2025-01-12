@@ -11,7 +11,7 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-    origin: "https://turing.69xdev.in",
+    origin: process?.env?.NEXT_PUBLIC_FRONTEND_URL,
     credentials: true
 }));
 app.use(express.json());
