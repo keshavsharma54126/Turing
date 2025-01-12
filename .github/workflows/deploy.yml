@@ -12,14 +12,14 @@ jobs:
     steps:
       - name: Deploy to Docker Hub
         uses: docker/build-push-action@v3
-  
-      -name: Login to Docker Hub
+
+      - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
- 
-      -name: Build and push docker image for frontend
+
+      - name: Build and push docker image for frontend
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -30,18 +30,17 @@ jobs:
             NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
             NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
             NEXT_PUBLIC_GOOGLE_CLIENT_SECRET: ${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET }}
-            NEXT_PUBLIC_ACCESS_KEY_ID: ${{ secrets.NEXT_PUBLIC_ACCESS_KEY_ID }}
-            NEXT_PUBLIC_SECRET_ACCESS_KEY: ${{ secrets.NEXT_PUBLIC_SECRET_ACCESS_KEY }}
-            NEXT_PUBLIC_REGION: ${{ secrets.NEXT_PUBLIC_REGION }}
-            NEXT_PUBLIC_BUCKET_NAME: ${{ secrets.NEXT_PUBLIC_BUCKET_NAME }}
+            NEXT_PUBLIC_AWS_ACCESS_KEY_ID: ${{ secrets.NEXT_PUBLIC_AWS_ACCESS_KEY_ID }}
+            NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY: ${{ secrets.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY }}
+            NEXT_PUBLIC_AWS_REGION: ${{ secrets.NEXT_PUBLIC_AWS_REGION }}
+            NEXT_PUBLIC_AWS_BUCKET_NAME: ${{ secrets.NEXT_PUBLIC_AWS_BUCKET_NAME }}
             JWT_SECRET: ${{ secrets.JWT_SECRET }}
             NEXT_PUBLIC_FRONTEND_URL: ${{ secrets.NEXT_PUBLIC_FRONTEND_URL }}
             DATABASE_URL: ${{ secrets.DATABASE_URL }}
             GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
             GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
             GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-
-      -name: Build and push docker to backend
+      - name: Build and push docker to backend
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -52,10 +51,10 @@ jobs:
             NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
             NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
             NEXT_PUBLIC_GOOGLE_CLIENT_SECRET: ${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET }}
-            NEXT_PUBLIC_ACCESS_KEY_ID: ${{ secrets.NEXT_PUBLIC_ACCESS_KEY_ID }}
-            NEXT_PUBLIC_SECRET_ACCESS_KEY: ${{ secrets.NEXT_PUBLIC_SECRET_ACCESS_KEY }}
-            NEXT_PUBLIC_REGION: ${{ secrets.NEXT_PUBLIC_REGION }}
-            NEXT_PUBLIC_BUCKET_NAME: ${{ secrets.NEXT_PUBLIC_BUCKET_NAME }}
+            NEXT_PUBLIC_AWS_ACCESS_KEY_ID: ${{ secrets.NEXT_PUBLIC_AWS_ACCESS_KEY_ID }}
+            NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY: ${{ secrets.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY }}
+            NEXT_PUBLIC_AWS_REGION: ${{ secrets.NEXT_PUBLIC_AWS_REGION }}
+            NEXT_PUBLIC_AWS_BUCKET_NAME: ${{ secrets.NEXT_PUBLIC_AWS_BUCKET_NAME }}
             JWT_SECRET: ${{ secrets.JWT_SECRET }}
             NEXT_PUBLIC_FRONTEND_URL: ${{ secrets.NEXT_PUBLIC_FRONTEND_URL }}
             DATABASE_URL: ${{ secrets.DATABASE_URL }}

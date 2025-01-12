@@ -1,0 +1,59 @@
+FROM node:20-alpine
+
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    gcc \
+    libc-dev \
+    pkgconfig \
+    pixman-dev \
+    cairo-dev \
+    pango-dev \
+    jpeg-dev \
+    giflib-dev \
+    librsvg-dev \
+    openssl
+
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID
+ARG NEXT_PUBLIC_GOOGLE_CLIENT_SECRET
+ARG NEXT_PUBLIC_AWS_ACCESS_KEY_ID
+ARG NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY
+ARG NEXT_PUBLIC_AWS_REGION
+ARG NEXT_PUBLIC_AWS_BUCKET_NAME
+ARG JWT_SECRET
+ARG NEXT_PUBLIC_FRONTEND_URL
+ARG DATABASE_URL
+ARG GEMINI_API_KEY
+
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ENV NEXT_PUBLIC_GOOGLE_CLIENT_ID=${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
+ENV NEXT_PUBLIC_GOOGLE_CLIENT_SECRET=${NEXT_PUBLIC_GOOGLE_CLIENT_SECRET}
+ENV NEXT_PUBLIC_ACCESS_KEY_ID=${NEXT_PUBLIC_ACCESS_KEY_ID}
+ENV NEXT_PUBLIC_SECRET_ACCESS_KEY=${NEXT_PUBLIC_SECRET_ACCESS_KEY}
+ENV NEXT_PUBLIC_AWS_REGION=${NEXT_PUBLIC_AWS_REGION}
+ENV NEXT_PUBLIC_AWS_BUCKET_NAME=${NEXT_PUBLIC_AWS_BUCKET_NAME}
+ENV JWT_SECRET=${JWT_SECRET}
+ENV NEXT_PUBLIC_FRONTEND_URL=${NEXT_PUBLIC_FRONTEND_URL}
+ENV DATABASE_URL=${DATABASE_URL}
+ENV GEMINI_API_KEY=${GEMINI_API_KEY}
+
+WORKDIR /app 
+
+
+COPY package.json package-lock.json ./
+COPY turbo.json ./
+COPY packages/db/package.json ./packages/db/package.json
+COPY apps/backend/package.json ./apps/backend/package.json
+
+RUN npm install
+
+COPY apps/backend ./apps/backend
+COPY packages/db ./packages/db
+
+RUN npm run db:generate
+
+RUN cd apps/backend && npm run build && cd ../..
+
+CMD ["npm", "run", "start-backend"]
