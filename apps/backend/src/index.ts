@@ -11,7 +11,7 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-    origin: "http://localhost:3008",
+    origin: "https://turing.69xdev.in",
     credentials: true
 }));
 app.use(express.json());
