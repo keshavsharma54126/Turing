@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { Dropbox } from '@repo/ui/dropbox';
-import { LinkIcon } from 'lucide-react';
+import { LinkIcon, ChevronDown, ChevronUp } from 'lucide-react';
 import { useParams } from 'next/navigation';
 
 interface conversation{
@@ -34,6 +34,18 @@ const TutorAgent = () => {
   const params = useParams()
   const [responseLoading,setResponseLoading] = useState(false)
   const convoId = params.convoId
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const [showContext, setShowContext] = useState(false);
+
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatHistory]);
 
   useEffect(()=>{
     let token = '';
@@ -62,6 +74,7 @@ const TutorAgent = () => {
         else{
           setMemory("Currently there is no memory for this conversation")
         }
+        setTimeout(scrollToBottom, 100);
       }catch(err){
         console.error("error while getting resources",err)
       }
@@ -271,20 +284,32 @@ const TutorAgent = () => {
   }
 
   return (
-    <div className="p-2 max-w-[1920px] mx-auto overflow-y-auto max-h-screen">
-      <div className="flex items-center justify-between mb-2 p-2 bg-white brutalist-card">
-        <h2 className="text-3xl font-bold">{conversation?.topic}</h2>
-        <button 
-          onClick={() => router.push('/tutor-agent')} 
-          className="brutalist-button bg-[#1B4D3E] text-white px-4 py-2 flex items-center gap-2"
-        >
-          <span>←</span> Back to Conversations
-        </button>
+    <div className="p-1 sm:p-2 max-w-[1920px] mx-auto overflow-y-auto h-[calc(100dvh-1rem)]">
+      <div className="flex items-center justify-between mb-2 p-1 bg-white brutalist-card mx-2 md:mx-0 text-sm md:text-base">
+        <div className="flex items-center gap-2">
+          <h1 className="text-lg md:text-2xl font-bold truncate">
+            {conversation?.topic || 'New Conversation'}
+          </h1>
+          <button 
+            onClick={() => router.push('/tutor-agent')} 
+            className="brutalist-button bg-[#1B4D3E] text-white px-4 py-2 flex items-center gap-2"
+          >
+            <span>←</span> Back to Conversations
+          </button>
+        </div>
       </div>
       
-      <div className="grid grid-cols-12 gap-6">
-        <div className="col-span-12 md:col-span-5 space-y-6">
-          <div className="brutalist-card bg-white p-6 max-h-[400px] overflow-y-auto">
+      <button 
+        onClick={() => setShowContext(!showContext)}
+        className="md:hidden w-full mb-2 py-1.5 px-2 brutalist-card bg-white flex items-center justify-between mx-2 text-sm"
+      >
+        <span>Learning Context</span>
+        {showContext ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+      </button>
+      
+      <div className="grid grid-cols-12 gap-2 sm:gap-4 px-2 md:px-0">
+        <div className="col-span-12 md:col-span-5 space-y-2 sm:space-y-4">
+          <div className={`brutalist-card bg-white p-1.5 sm:p-3 max-h-[400px] overflow-y-auto text-sm md:text-base ${showContext ? 'block' : 'hidden md:block'}`}>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Learning Context</h2>
               <button
@@ -347,13 +372,19 @@ const TutorAgent = () => {
             </div>
           </div>
 
-          <div className="brutalist-card bg-white p-6">
+          <div className="brutalist-card bg-white p-1.5 sm:p-3 text-sm md:text-base">
             <h2 className="text-xl font-bold mb-4">Ask a Question</h2>
             <textarea
-              className="w-full p-4 border-2 border-[#1B4D3E] font-mono mb-4 min-h-[150px]"
+              className="w-full resize-none border rounded p-2 h-[60px] md:h-[120px]"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               placeholder="What would you like to learn about?"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault(); // Prevent default to avoid new line
+                  handleAskQuestion();
+                }
+              }}
             />
             
             <button
@@ -366,8 +397,8 @@ const TutorAgent = () => {
           </div>
         </div>
 
-        <div className="col-span-12 md:col-span-7 max-h-screen">
-          <div className="brutalist-card bg-white p-6 h-[calc(100vh-12rem)] flex flex-col">
+        <div className="col-span-12 md:col-span-7">
+          <div className="brutalist-card bg-white p-1.5 sm:p-3 h-[calc(100dvh-26rem)] md:h-[calc(100dvh-12rem)] flex flex-col text-sm md:text-base">
             <div className="border-b border-gray-200 pb-4 mb-6">
               <h2 className="text-xl font-bold mb-2">Conversation</h2>
               {memory && (
@@ -385,7 +416,10 @@ const TutorAgent = () => {
                 <p className="font-mono">Start a conversation by asking a question...</p>
               </div>
             ) : (
-              <div className="space-y-4 flex-1 overflow-y-auto pb-4 max-h-screen">
+              <div 
+                ref={chatContainerRef}
+                className="space-y-4 flex-1 overflow-y-auto pb-4"
+              >
                 {chatHistory.map((message, index) => (
                   <div
                     key={index}

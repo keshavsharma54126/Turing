@@ -192,31 +192,33 @@ const Home = () => {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto overflow-y-auto h-screen">
-      <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
+    <div className="p-3 sm:p-6 max-w-7xl mx-auto overflow-x-hidden min-h-screen">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-8">Dashboard</h1>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {/* Stats Grid - reduced size on mobile */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-6 mb-3 sm:mb-8">
         {statsCards.map((stat, idx) => (
-          <div key={idx} className="brutalist-card bg-white p-6">
-            <div className="flex items-center gap-4 mb-2">
-              <div className="p-2 rounded-lg bg-[#E0F4FF]">
-                {stat.icon}
+          <div key={idx} className="brutalist-card bg-white p-2 sm:p-6">
+            <div className="flex items-center gap-1.5 sm:gap-4">
+              <div className="p-1 sm:p-2 rounded-lg bg-[#E0F4FF]">
+                <div className="w-4 h-4 sm:w-6 sm:h-6">
+                  {stat.icon}
+                </div>
               </div>
               <div>
-                <p className="text-sm text-gray-600 font-mono">{stat.label}</p>
-                <p className="text-2xl font-bold">{stat.value}</p>
+                <p className="text-[10px] sm:text-sm text-gray-600 font-mono">{stat.label}</p>
+                <p className="text-sm sm:text-2xl font-bold">{stat.value}</p>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-
-        <div className="brutalist-card bg-white p-6">
-          <h2 className="text-xl font-bold mb-4">Learning Progress</h2>
-          <div className="h-[300px]">
+      {/* Charts Grid - reduced height on mobile */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6 mb-3 sm:mb-8">
+        <div className="brutalist-card bg-white p-2 sm:p-6">
+          <h2 className="text-base sm:text-xl font-bold mb-2 sm:mb-4">Learning Progress</h2>
+          <div className="h-[200px] sm:h-[300px]">
             <Line
               data={{
                 labels: testResults.map(r => new Date(r.date).toLocaleDateString()),
@@ -242,10 +244,9 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Subject Distribution */}
-        <div className="brutalist-card bg-white p-6">
-          <h2 className="text-xl font-bold mb-4">Subject Distribution</h2>
-          <div className="h-[300px]">
+        <div className="brutalist-card bg-white p-2 sm:p-6">
+          <h2 className="text-base sm:text-xl font-bold mb-2 sm:mb-4">Subject Distribution</h2>
+          <div className="h-[200px] sm:h-[300px]">
             <Doughnut
               data={{
                 labels: subjectData.labels,
@@ -268,26 +269,26 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Recent Tests */}
-      <div className="brutalist-card bg-white p-6">
-        <h2 className="text-xl font-bold mb-4">Recent Tests</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full">
+      {/* Recent Tests Table - adjusted for mobile */}
+      <div className="brutalist-card bg-white p-2 sm:p-6">
+        <h2 className="text-base sm:text-xl font-bold mb-2 sm:mb-4">Recent Tests</h2>
+        <div className="overflow-x-auto -mx-2 sm:mx-0">
+          <table className="w-full min-w-[500px] sm:min-w-[600px]">
             <thead>
               <tr className="border-b-2 border-[#1B4D3E]">
-                <th className="text-left p-4 font-mono">Test Title</th>
-                <th className="text-left p-4 font-mono">Date</th>
-                <th className="text-left p-4 font-mono">Score</th>
-                <th className="text-left p-4 font-mono">Actions</th>
+                <th className="text-left p-2 sm:p-4 font-mono text-xs sm:text-base">Test Title</th>
+                <th className="text-left p-2 sm:p-4 font-mono text-xs sm:text-base">Date</th>
+                <th className="text-left p-2 sm:p-4 font-mono text-xs sm:text-base">Score</th>
+                <th className="text-left p-2 sm:p-4 font-mono text-xs sm:text-base">Actions</th>
               </tr>
             </thead>
             <tbody>
               {testResults.map((test, idx) => (
                 <tr key={idx} className="border-b border-gray-200">
-                  <td className="p-4">{test.title}</td>
-                  <td className="p-4">{new Date(test.date).toLocaleDateString()}</td>
-                  <td className="p-4">
-                    <span className={`px-2 py-1 rounded ${
+                  <td className="p-2 sm:p-4 text-xs sm:text-base">{test.title}</td>
+                  <td className="p-2 sm:p-4 text-xs sm:text-base">{new Date(test.date).toLocaleDateString()}</td>
+                  <td className="p-2 sm:p-4 text-xs sm:text-base">
+                    <span className={`px-1.5 py-0.5 sm:px-2 sm:py-1 rounded ${
                       (test.score / test.totalQuestions*10)>0.7
                         ? 'bg-[#E5FFE0]'
                         : 'bg-[#FFE2E0]'
@@ -295,8 +296,11 @@ const Home = () => {
                       {((test.score /(test.totalQuestions*10)) * 100).toFixed(1)}%
                     </span>
                   </td>
-                  <td className="p-4">
-                    <button onClick={()=>(router.push(`/test/${test.id}`))} className="brutalist-button bg-[#1B4D3E] text-white px-4 py-2">
+                  <td className="p-2 sm:p-4">
+                    <button 
+                      onClick={()=>(router.push(`/test/${test.id}`))} 
+                      className="brutalist-button bg-[#1B4D3E] text-white px-2 py-1 sm:px-4 sm:py-2 text-xs sm:text-base"
+                    >
                       Review
                     </button>
                   </td>

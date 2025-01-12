@@ -115,10 +115,10 @@ const TutorAgent = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-4xl">
-      {/* Topic Input Section */}
-      <div className="mb-6">
-        <label htmlFor="topic" className="block text-lg font-medium text-gray-700 mb-2">
+    <div className="container mx-auto px-4 py-4 min-h-screen pb-safe-area">
+      {/* Topic Input Section - Reduced top margin on mobile */}
+      <div className="mb-3 sm:mb-6 mt-2 sm:mt-4">
+        <label htmlFor="topic" className="block text-base sm:text-lg font-medium text-gray-700 mb-2">
           What would you like to learn about?
         </label>
         <input
@@ -126,8 +126,8 @@ const TutorAgent = () => {
           id="topic"
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
-          placeholder="Enter a topic (e.g., 'JavaScript Promises' or 'React Hooks')"
-          className="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:border-[#31a783] focus:ring-2 focus:ring-[#31a783] focus:ring-opacity-50 outline-none transition-colors font-mono"
+          placeholder="Enter a topic..."
+          className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border-2 border-gray-300 focus:border-[#31a783] focus:ring-2 focus:ring-[#31a783] focus:ring-opacity-50 outline-none transition-colors font-mono text-sm sm:text-base"
         />
       </div>
 
@@ -136,36 +136,37 @@ const TutorAgent = () => {
         disabled={!topic.trim()}
         className={`w-full brutalist-button ${
           topic.trim() 
-            ? 'bg-[#31a783] hover:bg-[#42bba3]' 
+            ? 'bg-[#31a783] active:bg-[#42bba3] hover:bg-[#42bba3]' 
             : 'bg-gray-400 cursor-not-allowed'
-        } text-white px-4 py-3 flex items-center justify-center gap-2 mb-6 transition-colors`}
+        } text-white px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-center gap-2 mb-3 sm:mb-6 transition-colors rounded-lg touch-manipulation`}
       >
-        <MessageSquarePlus size={20} />
-        <span className="font-mono">Start Learning About {topic || '...'}</span>
+        <MessageSquarePlus size={16} className="sm:w-5 sm:h-5" />
+        <span className="font-mono text-sm sm:text-base">Start Learning About {topic || '...'}</span>
       </button>
 
-      {/* Conversations List */}
-      <div className="space-y-4 overflow-y-auto h-screen">
+      {/* Conversations List - Adjusted height calculation for mobile */}
+      <div className="space-y-2 sm:space-y-4 overflow-y-auto h-[calc(100vh-220px)] sm:h-[calc(100vh-240px)] pb-16 sm:pb-8">
         {conversations.map((conversation:Conversation) => (
           <div
             key={conversation.id}
             onClick={()=> navigateToConversation(conversation)}
-            className={`p-4 cursor-pointer hover:bg-[#42bba3] transition-colors rounded-lg border ${
+            className={`p-3 sm:p-4 cursor-pointer active:bg-[#42bba3] hover:bg-[#42bba3] transition-colors rounded-lg border shadow-sm ${
               selectedConversation === conversation.id ? 'bg-[#31a783] text-white' : 'bg-white'
             }`}
           >
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-bold mb-1 truncate">{conversation.topic}</h3>
-                <span className="text-xs text-gray-500">
+            <div className="flex justify-between items-center gap-3">
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold mb-0.5 sm:mb-1 truncate text-sm sm:text-base">{conversation.topic}</h3>
+                <span className="text-[10px] sm:text-xs text-gray-500">
                   {new Date(conversation.createdAt).toLocaleDateString()}
                 </span>
               </div>
               <button
                 onClick={(e) => handleDeleteConversation(e, conversation.id)}
-                className="p-2 hover:bg-red-100 rounded-full transition-colors"
+                className="p-2 sm:p-2 hover:bg-red-100 active:bg-red-200 rounded-full transition-colors flex-shrink-0 touch-manipulation"
+                aria-label="Delete conversation"
               >
-                <Trash2 size={18} className="text-red-500" />
+                <Trash2 size={14} className="text-red-500 sm:w-[18px] sm:h-[18px]" />
               </button>
             </div>
           </div>

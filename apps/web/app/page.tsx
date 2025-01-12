@@ -31,6 +31,14 @@ ChartJS.register(
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+    setIsMenuOpen(false);
+  };
+
   return (
     <nav className="fixed w-full bg-white/80 backdrop-blur-sm border-b border-gray-200 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -68,9 +76,9 @@ function Navbar() {
 
           {/* Desktop menu */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/features" className="text-gray-600 hover:text-gray-900">Features</Link>
-            <Link href="/pricing" className="text-gray-600 hover:text-gray-900">Pricing</Link>
-            <Link href="/about" className="text-gray-600 hover:text-gray-900">About</Link>
+            <button onClick={() => scrollToSection('features')} className="text-gray-600 hover:text-gray-900">Features</button>
+            <button onClick={() => scrollToSection('pricing')} className="text-gray-600 hover:text-gray-900">Pricing</button>
+            <button onClick={() => scrollToSection('about')} className="text-gray-600 hover:text-gray-900">About</button>
             <Link href="/signin" className="brutalist-button px-4 py-2 text-sm">Sign In</Link>
           </div>
         </div>
@@ -78,27 +86,24 @@ function Navbar() {
         {/* Mobile menu */}
         <div className={`md:hidden ${isMenuOpen ? 'block' : 'hidden'}`}>
           <div className="px-2 pt-2 pb-3 space-y-1 bg-white/90 backdrop-blur-sm border-t border-gray-200">
-            <Link 
-              href="/features" 
-              className="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md"
-              onClick={() => setIsMenuOpen(false)}
+            <button 
+              onClick={() => scrollToSection('features')}
+              className="block w-full text-left px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md"
             >
               Features
-            </Link>
-            <Link 
-              href="/pricing" 
-              className="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md"
-              onClick={() => setIsMenuOpen(false)}
+            </button>
+            <button 
+              onClick={() => scrollToSection('pricing')}
+              className="block w-full text-left px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md"
             >
               Pricing
-            </Link>
-            <Link 
-              href="/about" 
-              className="block px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md"
-              onClick={() => setIsMenuOpen(false)}
+            </button>
+            <button 
+              onClick={() => scrollToSection('about')}
+              className="block w-full text-left px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md"
             >
               About
-            </Link>
+            </button>
             <Link 
               href="/signin" 
               className="block px-3 py-2 brutalist-button text-center"
@@ -254,7 +259,7 @@ export default function Home() {
         </section>
 
         {/* Features Section - Updated */}
-        <section className="py-24 bg-[#FFE8D6]/90">
+        <section id="features" className="py-24 bg-[#FFE8D6]/90">
           <div className="absolute inset-0 pattern-grid opacity-30"></div>
           <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-4xl font-bold text-center mb-16">Features</h2>
@@ -475,7 +480,7 @@ export default function Home() {
         </section>
 
         {/* Pricing Section - Updated */}
-        <section className="py-24 bg-[#FFE8D6]/90">
+        <section id="pricing" className="py-24 bg-[#FFE8D6]/90">
           <div className="absolute inset-0 pattern-grid opacity-30"></div>
           <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-4xl font-bold text-center mb-16">Pricing</h2>

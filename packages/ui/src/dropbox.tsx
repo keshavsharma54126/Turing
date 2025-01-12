@@ -99,54 +99,56 @@ export function Dropbox({accessKeyId, secretAccessKey, region, bucketName, setPd
   };
 
   return (
-    <div className="w-full bg-teal-500/10 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-800 p-6">
+    <div className="w-full max-w-full bg-teal-500/10 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-800 p-4 sm:p-6 overflow-hidden">
       <div
         {...getRootProps()}
-        className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors duration-300 ${
+        className={`border-2 border-dashed rounded-xl p-4 sm:p-8 text-center cursor-pointer transition-colors duration-300 overflow-hidden ${
           isDragActive
             ? "border-primary-400 bg-primary-400/10"
             : "border-gray-600 hover:border-primary-400"
         }`}
       >
         <input {...getInputProps()} />
-        <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-        <p className="text-lg font-medium text-gray-300">
+        <Upload className="mx-auto h-8 w-8 sm:h-12 sm:w-12 text-gray-400 mb-2 sm:mb-4" />
+        <p className="text-base sm:text-lg font-medium text-gray-300">
           {isDragActive
             ? "Drop the files here"
             : "Drag & drop files here, or click to select files"}
         </p>
-        <p className="text-sm text-gray-400 mt-2">Supported formats: PDF</p>
+        <p className="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2">Supported formats: PDF</p>
       </div>
 
       {files.length > 0 && (
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold text-primary-400 mb-3 flex items-center gap-2">
-            <FileIcon className="h-5 w-5" />
-            Selected Files ({files.length})
+        <div className="mt-4 sm:mt-6 h-20  overflow-y-auto flex flex-col">
+          <h3 className="text-base sm:text-lg font-semibold text-primary-400 mb-2 sm:mb-3 flex items-center gap-2 flex-shrink-0">
+            <FileIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+            <span className="truncate">Selected Files ({files.length})</span>
           </h3>
-          <ul className="space-y-2">
-            {files.map((file, index) => (
-              <li
-                key={index}
-                className="flex items-center justify-between bg-slate-700/50 rounded-lg p-3 border border-gray-600 hover:bg-slate-700 transition-all"
-              >
-                <div className="flex items-center">
-                  <FileIcon className="h-5 w-5 text-primary-400 mr-2" />
-                  <span className="text-gray-300 truncate">{file.name}</span>
-                </div>
-                <button
-                  onClick={() => removeFile(file)}
-                  className="text-gray-400 hover:text-red-400 transition-colors duration-300"
+          <div className="flex-1 overflow-y-auto max-h-0">
+            <ul className="space-y-2 pr-2">
+              {files.map((file, index) => (
+                <li
+                  key={index}
+                  className="flex items-start justify-between bg-slate-700/50 rounded-lg p-2 sm:p-3 border border-gray-600 hover:bg-slate-700 transition-all w-full"
                 >
-                  <X className="h-5 w-5" />
-                </button>
-              </li>
-            ))}
-          </ul>
+                  <div className="flex items-start flex-1 min-w-0 mr-2">
+                    <FileIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary-400 mr-2 flex-shrink-0 mt-1" />
+                    <span className="text-gray-300 text-sm sm:text-base break-words">{file.name}</span>
+                  </div>
+                  <button
+                    onClick={() => removeFile(file)}
+                    className="text-gray-400 hover:text-red-400 transition-colors duration-300 flex-shrink-0"
+                  >
+                    <X className="h-4 w-4 sm:h-5 sm:w-5" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       )}
 
-      <div className="mt-6 flex flex-col items-center gap-4">
+      <div className="mt-4 sm:mt-6 flex flex-col items-center gap-3 sm:gap-4">
         {isLoading && (
           <div className="flex items-center gap-2 text-primary-400">
             <Loader className="w-5 h-5 animate-spin" />
@@ -170,14 +172,14 @@ export function Dropbox({accessKeyId, secretAccessKey, region, bucketName, setPd
 
         {hasUploaded && (
           <button
-            className="bg-green-500 text-black px-6 py-2 rounded-lg transition-colors duration-300 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto bg-green-500 text-black px-4 sm:px-6 py-2 rounded-lg transition-colors duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
             onClick={handleSubmit}
             disabled={isLoading || files.length === 0}
           >
             {isLoading ? (
-              <Loader className="h-4 w-4 animate-spin" />
+              <Loader className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
             ) : (
-              <CheckCircle className="h-4 w-4" />
+              <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" />
             )}
             {isLoading ? "Uploading..." : "Submit Files"}
           </button>

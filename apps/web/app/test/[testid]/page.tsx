@@ -236,13 +236,13 @@ const TestPage = () => {
   }
 
   return (
-    <div className="min-h-screen max-w-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-7xl mx-auto flex flex-col gap-8">
+    <div className="min-h-screen max-w-screen bg-gray-50 py-4 sm:py-8 px-2 sm:px-4">
+      <div className="max-w-7xl mx-auto flex flex-col gap-4 sm:gap-8 pb-20 sm:pb-24">
         {/* Test Header Card */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-          <div className="mb-6">
-            <h1 className="text-4xl font-bold mb-4 text-[#1B4D3E]">{test.title}</h1>
-            <div className="flex flex-wrap gap-3">
+        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-8 mb-4 sm:mb-8">
+          <div className="mb-4 sm:mb-6">
+            <h1 className="text-2xl sm:text-4xl font-bold mb-3 sm:mb-4 text-[#1B4D3E]">{test.title}</h1>
+            <div className="flex flex-wrap gap-2 sm:gap-3">
               <span className={`px-4 py-2 rounded-full font-medium ${
                 test.difficulty === 'easy' ? 'bg-green-100 text-green-800' :
                 test.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' :
@@ -275,9 +275,9 @@ const TestPage = () => {
             </div>
           </div>
 
-          {/* Enhanced Scorecard */}
+          {/* Enhanced Scorecard - make grid single column on mobile */}
           {isSubmitted && (
-            <div className="bg-gradient-to-br from-green-50 to-green-100 border-3 border-black p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mt-6">
+            <div className="bg-gradient-to-br from-green-50 to-green-100 border-3 border-black p-4 sm:p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] mt-6">
               {/* Header */}
               <div className="flex items-center justify-center gap-3 mb-6">
                 <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -302,7 +302,7 @@ const TestPage = () => {
               </div>
 
               {/* Statistics Grid */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 <div className="bg-white border-2 border-black p-4 text-center shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                   <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
                     <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -337,26 +337,22 @@ const TestPage = () => {
           )}
         </div>
 
-        {/* Questions */}
-        <div className="space-y-8">
+        {/* Questions - adjust padding and font sizes */}
+        <div className="space-y-4 sm:space-y-8">
           {test.questions.map((q: any, idx: number) => (
-            <div 
-              key={idx} 
-              className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none"
-            >
-              {/* Question Header */}
-              <div className="bg-[#32bd93] border-b-4 border-black p-6">
-                <p className="text-xl font-bold text-white flex items-center gap-3">
-                  <span className="flex items-center justify-center bg-white text-black border-2 border-black w-10 h-10 rounded-none font-black">
+            <div key={idx} className="bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none">
+              <div className="bg-[#32bd93] border-b-4 border-black p-4 sm:p-6">
+                <p className="text-lg sm:text-xl font-bold text-white flex items-center gap-2 sm:gap-3">
+                  <span className="flex items-center justify-center bg-white text-black border-2 border-black w-8 h-8 sm:w-10 sm:h-10 rounded-none font-black">
                     {idx + 1}
                   </span>
                   {q.question}
                 </p>
               </div>
 
-              {/* Options */}
-              <div className="p-6">
-                <div className="space-y-4">
+              {/* Options - adjust padding */}
+              <div className="p-4 sm:p-6">
+                <div className="space-y-3 sm:space-y-4">
                   {q.options.map((option: string, optIdx: number) => {
                     const isCorrect = q.correctAnswer === option;
                     const isSelected = userAnswers[idx] === option;
@@ -419,10 +415,10 @@ const TestPage = () => {
                   })}
                 </div>
               
-                {/* Neo-Brutalist Explanation Card */}
+                {/* Explanation Card */}
                 {(fetchedUserAnswers[idx] && test.isCompleted) && (
-                  <div className="mt-6">
-                    <div className="bg-yellow-100 border-3 border-black p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                  <div className="mt-4 sm:mt-6">
+                    <div className="bg-yellow-100 border-3 border-black p-4 sm:p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                       <div className="flex items-center gap-2 mb-3">
                         <span className="font-black text-lg border-2 border-black px-2 bg-white">
                           !
@@ -447,12 +443,12 @@ const TestPage = () => {
         </div>
       )}
 
-      {/* Submit Button and Confirmation Dialog */}
-      <div className="fixed bottom-0 left-0 right-0 px-4">
+      {/* Submit Button - adjust padding and position */}
+      <div className="fixed bottom-0 left-0 right-0 px-2 sm:px-4 pb-2 sm:pb-4 bg-gray-50">
         <div className="max-w-4xl mx-auto">
           {!isSubmitted && (
             <button 
-              className="w-full bg-[#eb4b4b] text-white p-4 font-black text-lg border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] 
+              className="w-full bg-[#eb4b4b] text-white p-3 sm:p-4 font-black text-base sm:text-lg border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] 
               hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none transition-all"
               onClick={handleSubmitTest}
             >
@@ -462,10 +458,10 @@ const TestPage = () => {
         </div>
       </div>
 
-      {/* Confirmation Dialog */}
+      {/* Confirmation Dialog - adjust padding */}
       {showConfirmDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white border-4 border-black p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-md w-full">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-3 sm:p-4 z-50">
+          <div className="bg-white border-4 border-black p-4 sm:p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] max-w-md w-full mx-2">
             <h3 className="text-2xl font-black mb-4">Are you sure?</h3>
             <p className="text-gray-600 mb-6">
               Once submitted, you won't be able to change your answers. Make sure you've reviewed all questions.
@@ -480,7 +476,7 @@ const TestPage = () => {
               </button>
               <button
                 onClick={confirmSubmit}
-                className="flex-1 bg-[#eb4b4b] text-white p-3 font-bold border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] 
+                className="flex-1  bg-[#eb4b4b] text-white p-3 font-bold border-3 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] 
                 hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-none transition-all"
               >
                 SUBMIT
