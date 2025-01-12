@@ -152,11 +152,12 @@ export default function SignIn() {
 
 const GoogleLoginButton = () => {
   const router = useRouter()
-  if(!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID){
+  const clientId = process?.env?.NEXT_PUBLIC_GOOGLE_CLIENT_ID as string || ""
+  if(!clientId){
     console.log("Google Client ID not found")
   }
   return (
-  <GoogleOAuthProvider  clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID as string}>
+  <GoogleOAuthProvider  clientId={clientId}>
     <GoogleLogin
       onSuccess={async (credentialResponse) => {
         if (!credentialResponse.credential) {
