@@ -6,7 +6,10 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "start": "turbo start",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "db:generate": "cd packages/db && npx prisma generate && cd ../..",
+    "start-web": "cd ./apps/web && npm run start && cd ../..",
+    "start-backend": "cd ./apps/backend && npm run start && cd ../.."
   },
   "devDependencies": {
     "autoprefixer": "^10.4.20",
