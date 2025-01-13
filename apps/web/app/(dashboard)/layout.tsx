@@ -88,15 +88,16 @@ const Sidebar = () => {
                 <span className="font-mono">{item.label}</span>
               </Link>
             ))}
-          </nav>
-          
-          <button
+             <button
             className="flex items-center gap-3 p-3 rounded transition-all duration-200 dashboard-button mb-2 !bg-[#f12e2e] hover:!bg-[#be1a1a] text-white"
             onClick={handleLogout}
           >
             <LogOut size={20} />
             <span className="font-mono">Logout</span>
           </button>
+          </nav>
+          
+         
         </div>
       </div>
 
