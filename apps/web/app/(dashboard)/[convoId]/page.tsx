@@ -156,10 +156,10 @@ const TutorAgent = () => {
       isLoading: true,
       isStreaming: true 
     }]);
-    useChatRef.current = useChatRef.current ? [...useChatRef.current, {type:'user', content:question}] : [{type:'user', content:question}];
+    
     try {
-      setQuestion('');
-      const token = localStorage.getItem("authToken") as string;
+        setQuestion('');
+        const token = localStorage.getItem("authToken") as string;
 
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/conversations/chat-stream`, {
             method: 'POST',
@@ -182,7 +182,8 @@ const TutorAgent = () => {
         if (!reader) {
             throw new Error('No reader available');
         }
-        let messageString =''
+        
+        let messageString = '';
 
         while (true) {
             const { done, value } = await reader.read();
@@ -195,49 +196,51 @@ const TutorAgent = () => {
                         isLoading: false,
                         isStreaming: false 
                     }];
-
-
                 });
-
                 break;
             }
 
             // Decode the chunk
             const text = new TextDecoder().decode(value);
-            let buffer = ''
             const lines = text.split('\n');
 
             for (const line of lines) {
-               if(line.trim()==='')continue
-                    try {
-                      console.log(line)
-                      buffer+=line
-                        const data = JSON.parse(buffer)
-                        console.log(data)
-                        messageString+=data.text
-
-                        // Update immediately with just the new chunk
+                if (line.trim() === '') continue;
+                
+                try {
+                    // Clean the line and remove the SSE prefix
+                    const cleanedLine = line.trim().replace(/^data: /, '');
+                    const data = JSON.parse(cleanedLine);
+                    
+                    if (data.text) {
+                        messageString += data.text;
+                        
+                        // Update chat history with the new chunk
                         setChatHistory(prev => {
                             const newHistory = [...prev];
                             const lastMessage = newHistory[newHistory.length - 1];
-                            newHistory[newHistory.length - 1] = {
+                            return [...prev.slice(0, -1), {
                                 type: 'ai',
-                                content: lastMessage?.content + data.text
-                            };
-                            return newHistory;
+                                content: messageString,
+                                isStreaming: true
+                            }];
                         });
-
-                       
-                    } catch (e) {
-                        console.error('Error parsing chunk:', e);
                     }
-                
+                } catch (e) {
+                    console.error('Error parsing chunk:', e);
+                    console.log('Problematic line:', line);
+                }
             }
-
         }
-        useChatRef.current = [...useChatRef.current,{type:'ai',content:messageString}]   
-        console.log(useChatRef.current)
-        await sendChatHistoryToBackend(useChatRef.current)
+
+        // After the stream is complete, update the chat history in the backend
+        useChatRef.current = [...(useChatRef.current || []), 
+            { type: 'user', content: question },
+            { type: 'ai', content: messageString }
+        ];
+        
+        await sendChatHistoryToBackend(useChatRef.current);
+        
     } catch (error) {
         console.error('Error:', error);
         setChatHistory(prev => {
@@ -245,6 +248,8 @@ const TutorAgent = () => {
             newHistory[newHistory.length - 1] = {
                 type: 'ai',
                 content: 'Sorry, an error occurred.',
+                isLoading: false,
+                isStreaming: false
             };
             return newHistory;
         });

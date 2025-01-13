@@ -182,8 +182,8 @@ const TestingAgent = () => {
 
   if(isLoading) {
     return (
-      <div className="min-h-screen w-full overflow-y-auto bg-gradient-to-b from-[#1B4D3E] to-[#2C7A7B] text-white p-3 sm:p-6">
-        <div className="max-w-2xl w-full space-y-4 sm:space-y-8 text-center">
+      <div className="min-h-screen w-full overflow-y-auto bg-gradient-to-b from-[#1B4D3E] to-[#2C7A7B] text-white p-3 sm:p-6 flex items-center justify-center">
+        <div className="max-w-2xl w-full space-y-4 sm:space-y-8 text-center sm:transform sm:-translate-y-1/4">
           <div className="relative">
             <Loader2 className="w-12 h-12 sm:w-16 sm:h-16 animate-spin mx-auto" />
             <div className="mt-3 text-base sm:text-xl font-semibold">

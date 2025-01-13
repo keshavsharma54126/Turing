@@ -148,13 +148,12 @@ conversationRouter.post("/addContext",authMiddleware,async(req:any,res:any)=>{
     }
 })
 
-conversationRouter.post("/chat-stream",authMiddleware,async(req:any,res:any)=>{
-    try{
-        const{question,conversationId,chatHistory} = req.body;
-        const relevantContext  = await VectorService.searchSimilarResourcesByConversation(question,5,0.6,conversationId)
-        
+conversationRouter.post("/chat-stream", authMiddleware, async (req: any, res: any) => {
+    try {
+        const { question, conversationId, chatHistory } = req.body;
+        const relevantContext = await VectorService.searchSimilarResourcesByConversation(question, 5, 0.6, conversationId);
 
-        const contextString = relevantContext && Array.isArray(relevantContext) 
+        const contextString = relevantContext && Array.isArray(relevantContext)
             ? relevantContext.map((doc: any) => doc.content).join('\n\n')
             : '';
 
@@ -177,27 +176,30 @@ conversationRouter.post("/chat-stream",authMiddleware,async(req:any,res:any)=>{
 
             Remember to be concise yet thorough in your explanations.`;
 
-        res.setHeader("Content-Type", "text/event-stream")
-        res.setHeader("Cache-Control", "no-cache")
-        res.setHeader("Connection", "keep-alive")
+        // Set proper SSE headers
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.setHeader('Transfer-Encoding', 'chunked');
 
         const stream = await GeminiService.genertaeStreamedResponse(question, systemPrompt);
+        const streamResponse = stream.stream;
 
-        const streamResponse = stream.stream
         for await (const chunk of streamResponse) {
             const text = chunk.text();
-            res.write(`${JSON.stringify({text})}\n\n`);
+            // Format as proper SSE data
+            res.write(`data: ${JSON.stringify({ text })}\n\n`);
+            // Flush the response to ensure immediate sending
+            if (res.flush) res.flush();
         }
 
-        res.end()
-
-    }catch(err){
-        console.error("error in chat stream",err)
-        return res.status(500).json({
-            error:"Stream processing failed"
-        })
+        res.end();
+    } catch (err) {
+        console.error("error in chat stream", err);
+        res.write(`data: ${JSON.stringify({ error: "Stream processing failed" })}\n\n`);
+        res.end();
     }
-})
+});
 
 conversationRouter.post("/updateChatHistory",authMiddleware,async(req:any,res:any)=>{
     try{
