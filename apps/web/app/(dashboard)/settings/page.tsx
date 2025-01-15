@@ -24,15 +24,15 @@ const Settings = () => {
  
 
   return (
-    <div className="max-w-4xl mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8">Settings</h1>
+    <div className="max-w-4xl mx-auto px-4 py-4 sm:py-8">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Settings</h1>
 
       {/* Profile Section */}
-      <div className="brutalist-card bg-white p-6 mb-8 border-2 border-[#1B4D3E]">
-        <h2 className="text-xl font-bold mb-6 font-mono">Profile</h2>
-        <form >
-          <div className="flex items-center mb-6">
-            <div className="w-20 h-20 mr-6 rounded-full overflow-hidden border-2 border-[#1B4D3E]">
+      <div className="brutalist-card bg-white p-4 sm:p-6 mb-6 sm:mb-8 border-2 border-[#1B4D3E]">
+        <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6 font-mono">Profile</h2>
+        <form>
+          <div className="flex flex-col sm:flex-row items-center mb-4 sm:mb-6">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 mb-4 sm:mb-0 sm:mr-6 rounded-full overflow-hidden border-2 border-[#1B4D3E]">
               <Image
                 src={formData.profileImage}
                 alt="Profile"
@@ -52,7 +52,7 @@ const Settings = () => {
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <label className="block mb-2 font-mono text-sm">Username</label>
               <input

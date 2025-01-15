@@ -49,6 +49,24 @@ testRouter.post("/generate-test", authMiddleware, async(req:any, res:any) => {
                 questions
             }
         })
+
+        if(test && questions){
+            const user = await prisma.user.findUnique({
+                where: { id: req.userId },
+                select: { testCount: true }
+            });
+
+            if (user) {
+                await prisma.user.update({
+                    where: {
+                        id: req.userId
+                    },
+                    data: {
+                        testCount: user.testCount + 1
+                    }
+                });
+            }
+        }
         return res.status(200).json({test})
    } catch(e) {
         console.error("Detailed error:", e);

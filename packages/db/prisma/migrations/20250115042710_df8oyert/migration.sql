@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "users" ADD COLUMN     "SessionQuerryCount" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "testCount" INTEGER NOT NULL DEFAULT 0;

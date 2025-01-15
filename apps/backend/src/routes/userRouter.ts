@@ -66,6 +66,8 @@ userRouter.get("/getUserData",authMiddleware,async(req:any,res:any)=>{
                     username:true,
                     testCount:true,
                     SessionQuerryCount:true,
+                    profileImage:true,
+                    subTier:true,
                     tests:{
                         select:{
                             id:true,

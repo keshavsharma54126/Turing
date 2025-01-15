@@ -23,12 +23,13 @@ model User {
   imageUrl          String?       @map("image_url")
   googleId          String?       @map("google_id")
   profileImage      String?       @map("profile_image")
-  testCount         Int           @default(2)
-  SessionQuerryCount Int          @default(10)
+  testCount         Int           @default(0)
+  SessionQuerryCount Int          @default(0)
   role              UserRole      @default(USER)
   tests             Test[]
   results           TestResult[]
   conversations     Conversation[]
+  subTier           subTier       @default(FREE)
   createdAt         DateTime      @default(now()) @map("created_at")
   updatedAt         DateTime      @updatedAt @map("updated_at")
 
@@ -104,7 +105,17 @@ model Conversation {
   @@map("conversations")
 }
 
+model Plans{
+  id  String   @id @default(cuid()) @map("plan_id")
+}
+
 enum UserRole {
   USER
   ADMIN
+}
+
+enum subTier{
+  FREE 
+  PRO 
+  TEAM
 }

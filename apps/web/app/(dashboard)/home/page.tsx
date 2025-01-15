@@ -192,7 +192,7 @@ const Home = () => {
   }
 
   return (
-    <div className=" max-w-7xl mx-auto overflow-x-hidden min-h-screen">
+    <div className=" max-w-7xl  mx-auto overflow-x-hidden min-h-screen">
       <h1 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-8">Dashboard</h1>
 
       {/* Stats Grid - reduced size on mobile */}

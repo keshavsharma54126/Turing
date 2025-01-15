@@ -151,6 +151,24 @@ conversationRouter.post("/addContext",authMiddleware,async(req:any,res:any)=>{
 conversationRouter.post("/chat-stream", authMiddleware, async (req: any, res: any) => {
     try {
         const { question, conversationId, chatHistory } = req.body;
+
+        const user = await prisma.user.findUnique({
+            where:{
+                id:req.userId
+            }
+        })
+        if(!user){
+            return res.status(400).json({
+                message:"no user found "
+            })
+        }
+        // const sessionChatIncrement = await prisma.user.update({
+        //     where:{
+        //         id:req.userId
+        //     },data:{
+        //         SessionQuerryCount:user.SessionQuerryCount+1
+        //     }
+        // })
         const relevantContext = await VectorService.searchSimilarResourcesByConversation(question, 5, 0.6, conversationId);
 
         const contextString = relevantContext && Array.isArray(relevantContext)
@@ -194,6 +212,16 @@ conversationRouter.post("/chat-stream", authMiddleware, async (req: any, res: an
         }
 
         res.end();
+        if(stream){
+                await prisma.user.update({
+                    where:{
+                        id:req.userId
+                    },
+                    data:{
+                        SessionQuerryCount:user.SessionQuerryCount+1
+                    }
+                })
+        }
     } catch (err) {
         console.error("error in chat stream", err);
         res.write(`data: ${JSON.stringify({ error: "Stream processing failed" })}\n\n`);

@@ -7,6 +7,7 @@ import './dashboard.css';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Image from 'next/image';
+import { Router } from 'express';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -17,6 +18,24 @@ interface User {
   username: string;
   email: string;
   profileImage: string;
+  testCount: number;
+  SessionQuerryCount: number; 
+  subTier:any
+}
+
+const subTierTotalInfo = {
+  FREE:{
+    totalTest:2,
+    totalChat:100
+  },
+  PRO:{
+    totalTest:200,
+    totalChat:2000
+  },
+  TEAM:{
+    totalTest:1000,
+    totalChat:10000
+  }
 }
 
 const Sidebar = () => {
@@ -27,6 +46,7 @@ const Sidebar = () => {
     { icon: <TestTube size={20} />, label: 'Testing Agent', href: '/testing-agent' },
     { icon: <GraduationCap size={20} />, label: 'Tutor Agent', href: '/tutor-agent' },
     { icon: <Settings size={20} />, label: 'Settings', href: '/settings' },
+    { icon: <ArrowUpRight size={20} />, label: 'Subscription', href: '/subTier' },
   ];
   const [loading, setLoading] = useState(false);
 
@@ -108,6 +128,7 @@ const Sidebar = () => {
 };
 
 const Navbar = ({ user }: { user: User | null }) => {
+  const router = useRouter();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isStatsHovered, setIsStatsHovered] = useState(false);
 
@@ -149,7 +170,10 @@ const Navbar = ({ user }: { user: User | null }) => {
                   </div>
                   <div className="flex flex-col">
                     <span className="text-xs text-[#1B4D3E]/80">Tests</span>
-                    <span className="text-sm font-medium text-[#1B4D3E]">5/10</span>
+                    <span className="text-sm font-medium text-[#1B4D3E]">{user?.testCount.toString()}/{
+                      user?.subTier === "FREE" ? subTierTotalInfo.FREE.totalTest :
+                      user?.subTier === "PRO" ? subTierTotalInfo.PRO.totalTest : subTierTotalInfo.TEAM.totalTest
+                      }</span>
                   </div>
                 </div>
 
@@ -163,7 +187,10 @@ const Navbar = ({ user }: { user: User | null }) => {
                   </div>
                   <div className="flex flex-col">
                     <span className="text-xs text-[#1B4D3E]/80">Queries</span>
-                    <span className="text-sm font-medium text-[#1B4D3E]">2/5</span>
+                    <span className="text-sm font-medium text-[#1B4D3E]">{user?.SessionQuerryCount.toString()}/{
+                      user?.subTier === "FREE" ? subTierTotalInfo.FREE.totalChat :
+                      user?.subTier === "PRO" ? subTierTotalInfo.PRO.totalChat : subTierTotalInfo.TEAM.totalChat
+                      }</span>
                   </div>
                 </div>
               </div>
@@ -182,10 +209,10 @@ const Navbar = ({ user }: { user: User | null }) => {
                         <TestTube size={16} className="text-[#1B4D3E]" />
                         <span className="text-sm text-[#1B4D3E]">Tests</span>
                       </div>
-                      <span className="text-sm font-medium text-[#1B4D3E]">5/10</span>
+                      <span className="text-sm font-medium text-[#1B4D3E]">{user?.testCount.toString()}</span>
                     </div>
                     <div className="w-full h-1.5 bg-[#1B4D3E]/10 rounded-full">
-                      <div className="h-full bg-gradient-to-r from-[#1B4D3E] to-[#2A6B5D] rounded-full" style={{ width: '50%' }}></div>
+                      <div className="h-full bg-gradient-to-r from-[#1B4D3E] to-[#2A6B5D] rounded-full" style={{ width: `${(user?.testCount || 0) / (user?.subTier === "FREE" ? subTierTotalInfo.FREE.totalTest : user?.subTier === "PRO" ? subTierTotalInfo.PRO.totalTest : subTierTotalInfo.TEAM.totalTest) * 100}%` }}></div>
                     </div>
                   </div>
 
@@ -195,17 +222,17 @@ const Navbar = ({ user }: { user: User | null }) => {
                         <GraduationCap size={16} className="text-[#1B4D3E]" />
                         <span className="text-sm text-[#1B4D3E]">Queries</span>
                       </div>
-                      <span className="text-sm font-medium text-[#1B4D3E]">2/5</span>
+                      <span className="text-sm font-medium text-[#1B4D3E]">{user?.SessionQuerryCount.toString()}</span>
                     </div>
                     <div className="w-full h-1.5 bg-[#1B4D3E]/10 rounded-full">
-                      <div className="h-full bg-gradient-to-r from-[#1B4D3E] to-[#2A6B5D] rounded-full" style={{ width: '40%' }}></div>
+                      <div className="h-full bg-gradient-to-r from-[#1B4D3E] to-[#2A6B5D] rounded-full" style={{ width: `${(user?.SessionQuerryCount || 0) / (user?.subTier === "FREE" ? subTierTotalInfo.FREE.totalChat : user?.subTier === "PRO" ? subTierTotalInfo.PRO.totalChat : subTierTotalInfo.TEAM.totalChat) * 100}%` }}></div>
                     </div>
                   </div>
 
                   {/* Upgrade Button */}
                   <button
                     className="w-full mt-2 p-2 bg-gradient-to-r from-[#1B4D3E] to-[#2A6B5D] text-white text-sm rounded-lg hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2"
-                    onClick={() => {/* Add upgrade plan logic here */}}
+                    onClick={() => (router.push("/subTier"))}
                   >
                     <span>Upgrade Plan</span>
                     <ArrowUpRight size={16} />
@@ -249,12 +276,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const fetchUser = async () => {
       try {
         const token = localStorage.getItem('authToken');
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/user`, {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/getUserData`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
-        const user = response.data.user;
+        const user = response.data.userData;
+        console.log(user)
         setUser(user);
       } catch (e) {
         console.log(e);
@@ -268,7 +296,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <Sidebar />
       <div className="flex-1 flex flex-col lg:ml-64">
         <Navbar user={user} />
-        <main className="flex-1 p-2 lg:p-8 pt-16 lg:pt-28 overflow-x-hidden overflow-y-auto">
+        <main className="flex-1 px- lg:p-8 pt-16 lg:pt-28 overflow-x-hidden overflow-y-auto">
           {children}
         </main>
       </div>
