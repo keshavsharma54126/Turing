@@ -101,7 +101,7 @@ export default function SignIn() {
   
                 <button
                   onClick={handleSignIn}
-                  className="brutalist-button w-full py-3 bg-[#FF6B6B] hover:bg-[#FF8C66] text-white font-bold"
+                  className="brutalist-button w-full py-3 mt-4 bg-[#FF6B6B] hover:bg-[#FF8C66] text-white font-bold"
                 >
                   Sign In
                 </button>
@@ -116,12 +116,8 @@ export default function SignIn() {
                   </div>
                 </div>
   
-                <div className="mt-6 grid grid-cols-2 gap-4">
+                <div className="mt-6 ">
                   <GoogleLoginButton clientId="883449637885-trb16ii0jj4qu7bj44mf6c6nqdkomtuh.apps.googleusercontent.com"/>
-                  <button className="brutalist-button w-full py-3 bg-[#FF6B6B] hover:bg-[#FF8C66] text-white font-bold flex items-center justify-center">
-                    <FaGithub className="mr-2 text-xl" />
-                    GitHub
-                  </button>
                 </div>
               </div>
               {error && <div className="text-red-500 text-center mt-4">{error}</div>}

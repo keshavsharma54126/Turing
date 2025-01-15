@@ -140,6 +140,28 @@ export default function Home() {
                 <p className="text-lg sm:text-xl md:text-2xl mb-12 font-mono text-gray-700 leading-relaxed">
                   Generate intelligent tests and get personalized tutoring powered by advanced AI
                 </p>
+                <div className="flex items-center space-x-4 mb-8">
+                  <div className="flex -space-x-2">
+                    <img 
+                      src="/testimonial1.jpg" 
+                      alt="Student 1" 
+                      className="w-10 h-10 rounded-full border-2 border-white"
+                    />
+                    <img 
+                      src="/testimonial2.jpg" 
+                      alt="Student 2" 
+                      className="w-10 h-10 rounded-full border-2 border-white"
+                    />
+                    <img 
+                      src="/testimonial3.jpg" 
+                      alt="Student 3" 
+                      className="w-10 h-10 rounded-full border-2 border-white"
+                    />
+                  </div>
+                  <div className="font-mono text-gray-600">
+                    <span className="font-bold">5000+</span> students transformed
+                  </div>
+                </div>
                 <div className="flex flex-col sm:flex-row gap-6">
                   <button onClick={() => router.push('/home')} className="brutalist-button px-8 py-4 text-lg font-bold bg-[#B8D8E3] hover:bg-[#9CC5D3]">
                     Get Started
@@ -151,7 +173,7 @@ export default function Home() {
               </div>
               
               <div className="relative h-[500px] hidden md:block">
-                <div className="absolute inset-0 brutalist-card p-6 bg-white">
+                <div className="absolute inset-0 brutalist-card p-6 bg-white animate-float">
                   <Line
                     data={{
                       labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'],
@@ -264,31 +286,59 @@ export default function Home() {
           <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-4xl font-bold text-center mb-16">Features</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-              <div className="brutalist-card bg-[#B8D8E3] p-8">
-                <h2 className="text-2xl font-bold mb-4">AI Test Generation</h2>
+              <div className="brutalist-card bg-[#B8D8E3] p-8 hover:shadow-xl transition-all">
+                <div className="flex items-center mb-4">
+                  <div className="w-10 h-10 bg-[#AED2E6] rounded-lg flex items-center justify-center mr-4">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                  </div>
+                  <h2 className="text-2xl font-bold">AI Test Generation</h2>
+                </div>
                 <p className="font-mono">
-                  Generate comprehensive tests from your resources and our knowledge base
+                  Generate comprehensive tests from your resources and our knowledge base. Create multiple choice, essay, and coding questions with detailed explanations.
                 </p>
               </div>
 
-              <div className="brutalist-card bg-[#F7CAC9] p-8">
-                <h2 className="text-2xl font-bold mb-4">Smart Tutoring</h2>
+              <div className="brutalist-card bg-[#F7CAC9] p-8 hover:shadow-xl transition-all">
+                <div className="flex items-center mb-4">
+                  <div className="w-10 h-10 bg-[#FFB5B5] rounded-lg flex items-center justify-center mr-4">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-2xl font-bold">Smart Tutoring</h2>
+                </div>
                 <p className="font-mono">
-                  Get personalized assistance and explanations from our AI tutor
+                  Get 24/7 personalized assistance with step-by-step explanations, concept breakdowns, and real-time feedback from our AI tutor.
                 </p>
               </div>
 
-              <div className="brutalist-card bg-[#F6E6B4] p-8">
-                <h2 className="text-2xl font-bold mb-4">Resource Management</h2>
+              <div className="brutalist-card bg-[#F6E6B4] p-8 hover:shadow-xl transition-all">
+                <div className="flex items-center mb-4">
+                  <div className="w-10 h-10 bg-[#FFE5B4] rounded-lg flex items-center justify-center mr-4">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-2xl font-bold">Resource Management</h2>
+                </div>
                 <p className="font-mono">
-                  Upload and organize your learning materials efficiently
+                  Upload, organize, and tag your learning materials. Our AI will automatically categorize and link related resources for efficient studying.
                 </p>
               </div>
 
-              <div className="brutalist-card bg-[#C3E6CB] p-8">
-                <h2 className="text-2xl font-bold mb-4">Progress Tracking</h2>
+              <div className="brutalist-card bg-[#C3E6CB] p-8 hover:shadow-xl transition-all">
+                <div className="flex items-center mb-4">
+                  <div className="w-10 h-10 bg-[#B4E4B4] rounded-lg flex items-center justify-center mr-4">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-2xl font-bold">Progress Tracking</h2>
+                </div>
                 <p className="font-mono">
-                  Monitor your learning journey with detailed analytics
+                  Monitor your learning journey with detailed analytics, performance trends, and personalized recommendations for improvement.
                 </p>
               </div>
             </div>
@@ -301,59 +351,71 @@ export default function Home() {
           <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-4xl font-bold text-center mb-16">Smart Study Tools</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-12">
-              <div className="brutalist-card bg-[#E0F4FF] p-8 hover:transform hover:scale-105 transition-transform">
-                <div className="flex items-start space-x-4">
-                  <div className="p-3 bg-[#AED2E6] rounded-lg">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-2">Smart Flashcards</h3>
-                    <p className="font-mono text-gray-600">AI-generated flashcards that adapt to your learning style and progress</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="brutalist-card bg-[#FFE2E0] p-8 hover:transform hover:scale-105 transition-transform">
-                <div className="flex items-start space-x-4">
-                  <div className="p-3 bg-[#FFB5B5] rounded-lg">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-2">Practice Quizzes</h3>
-                    <p className="font-mono text-gray-600">Instant quizzes generated from your notes with detailed explanations</p>
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-[#AED2E6] to-[#E0F4FF] rounded-3xl blur opacity-25 group-hover:opacity-50 transition-all duration-300"></div>
+                <div className="relative bg-[#E5FFE0]/90 backdrop-blur-sm rounded-2xl p-8 hover:shadow-lg transition-all">
+                  <div className="flex items-start space-x-4">
+                    <div className="p-3 bg-gradient-to-br from-[#AED2E6] to-[#B8D8E3] rounded-xl">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold mb-2">Smart Flashcards</h3>
+                      <p className="font-mono text-gray-600">AI-generated flashcards that adapt to your learning style and progress</p>
+                    </div>
                   </div>
                 </div>
               </div>
               
-              <div className="brutalist-card bg-[#E5FFE0] p-8 hover:transform hover:scale-105 transition-transform">
-                <div className="flex items-start space-x-4">
-                  <div className="p-3 bg-[#B4E4B4] rounded-lg">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-2">Study Guides</h3>
-                    <p className="font-mono text-gray-600">Personalized study guides that highlight key concepts and knowledge gaps</p>
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-[#FFB5B5] to-[#FFE2E0] rounded-3xl blur opacity-25 group-hover:opacity-50 transition-all duration-300"></div>
+                <div className="relative bg-[#E5FFE0]/90 backdrop-blur-sm rounded-2xl p-8 hover:shadow-lg transition-all">
+                  <div className="flex items-start space-x-4">
+                    <div className="p-3 bg-gradient-to-br from-[#FFB5B5] to-[#F7CAC9] rounded-xl">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold mb-2">Practice Quizzes</h3>
+                      <p className="font-mono text-gray-600">Instant quizzes generated from your notes with detailed explanations</p>
+                    </div>
                   </div>
                 </div>
               </div>
               
-              <div className="brutalist-card bg-[#FFE8D6] p-8 hover:transform hover:scale-105 transition-transform">
-                <div className="flex items-start space-x-4">
-                  <div className="p-3 bg-[#FFE5B4] rounded-lg">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
-                    </svg>
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-[#B4E4B4] to-[#E5FFE0] rounded-3xl blur opacity-25 group-hover:opacity-50 transition-all duration-300"></div>
+                <div className="relative bg-[#E5FFE0]/90 backdrop-blur-sm rounded-2xl p-8 hover:shadow-lg transition-all">
+                  <div className="flex items-start space-x-4">
+                    <div className="p-3 bg-gradient-to-br from-[#B4E4B4] to-[#C3E6CB] rounded-xl">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold mb-2">Study Guides</h3>
+                      <p className="font-mono text-gray-600">Personalized study guides that highlight key concepts and knowledge gaps</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold mb-2">Progress Analytics</h3>
-                    <p className="font-mono text-gray-600">Visual insights into your learning journey and improvement areas</p>
+                </div>
+              </div>
+              
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-[#FFE5B4] to-[#FFE8D6] rounded-3xl blur opacity-25 group-hover:opacity-50 transition-all duration-300"></div>
+                <div className="relative bg-[#E5FFE0]/90 backdrop-blur-sm rounded-2xl p-8 hover:shadow-lg transition-all">
+                  <div className="flex items-start space-x-4">
+                    <div className="p-3 bg-gradient-to-br from-[#FFE5B4] to-[#F6E6B4] rounded-xl">
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold mb-2">Progress Analytics</h3>
+                      <p className="font-mono text-gray-600">Visual insights into your learning journey and improvement areas</p>
+                    </div>
                   </div>
                 </div>
               </div>

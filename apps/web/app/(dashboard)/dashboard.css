@@ -3,10 +3,11 @@
   --dashboard-primary: #1B4D3E;    /* Dark Forest Green */
   --dashboard-secondary: #2A6B5D;   /* Deeper Sea Green */
   --dashboard-accent: #5B9A8B;      /* Rich Sage Green */
-  --dashboard-bg: #DCE8E3;         /* Muted Sage */
+  --dashboard-bg: #d2f0e3;         /* Muted Sage */
   --dashboard-text: #1B4D3E;       /* Dark Forest Green */
-  --dashboard-light: #F0F5F3;      /* Light Sage */
-  --dashboard-hover: #153D31;      /* Darker Forest Green */
+  --dashboard-light: #e3f1ec;      /* Light Sage */
+  --dashboard-hover: #153D31; 
+  --dashboard-card:#3d151e;     /* Darker Forest Green */
 }
 
 /* Add pattern background */

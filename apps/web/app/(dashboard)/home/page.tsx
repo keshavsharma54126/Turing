@@ -126,7 +126,7 @@ const Home = () => {
         });
 
         const userData = response.data.userData;
-        
+        console.log(userData)
         const tests = userData.tests || [];
         const conversations = userData.conversations || [];
  
@@ -174,7 +174,7 @@ const Home = () => {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="p-2 max-w-7xl mx-auto">
         <div className="animate-pulse space-y-8">
           <div className="h-8 bg-gray-200 rounded w-1/4"></div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -192,7 +192,7 @@ const Home = () => {
   }
 
   return (
-    <div className="p-3 sm:p-6 max-w-7xl mx-auto overflow-x-hidden min-h-screen">
+    <div className=" max-w-7xl mx-auto overflow-x-hidden min-h-screen">
       <h1 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-8">Dashboard</h1>
 
       {/* Stats Grid - reduced size on mobile */}

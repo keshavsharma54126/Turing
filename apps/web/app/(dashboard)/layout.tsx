@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Home, TestTube, GraduationCap, Settings, Menu, X, LogOut, Loader2, Search } from 'lucide-react';
+import { Home, TestTube, GraduationCap, Settings, Menu, X, LogOut, Loader2, Search, ArrowUpRight } from 'lucide-react';
 import './dashboard.css';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
@@ -55,7 +55,6 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* Mobile Menu Button - Moved to top-right for better reachability */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="lg:hidden fixed top-4 left-2 right-4 z-50 dashboard-button p-2 h-10 w-10 flex items-center justify-center rounded-full"
@@ -64,7 +63,6 @@ const Sidebar = () => {
         {isOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
 
-      {/* Sidebar - Added backdrop blur and improved animation */}
       <div
         className={`${
           isOpen ? 'translate-x-0' : '-translate-x-full'
@@ -96,12 +94,9 @@ const Sidebar = () => {
             <span className="font-mono">Logout</span>
           </button>
           </nav>
-          
-         
         </div>
       </div>
 
-      {/* Improved overlay with blur effect */}
       {isOpen && (
         <div
           className="fixed inset-0 lg:hidden z-30 bg-black/20 backdrop-blur-sm transition-all duration-300"
@@ -114,11 +109,11 @@ const Sidebar = () => {
 
 const Navbar = ({ user }: { user: User | null }) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isStatsHovered, setIsStatsHovered] = useState(false);
 
   return (
     <div className="h-20 bg-[#E8EEF2] border-b-2 border-[#1B4D3E] fixed top-0 right-0 left-0 lg:left-64 z-20 brutalist-card">
       <div className="h-full flex items-center justify-between px-4 lg:px-6">
-        {/* Mobile Search Toggle */}
         <button
           onClick={() => setIsSearchOpen(!isSearchOpen)}
           className="lg:hidden p-2 left-10 dashboard-button"
@@ -127,7 +122,6 @@ const Navbar = ({ user }: { user: User | null }) => {
         </button>
 
         <div className="flex-1 flex items-center justify-end gap-4">
-          {/* Search Bar - Responsive */}
           <div className={`
             absolute lg:relative top-full left-0 right-0 p-4 lg:p-0 bg-[#E8EEF2] 
             ${isSearchOpen ? 'flex' : 'hidden lg:flex'}
@@ -140,10 +134,91 @@ const Navbar = ({ user }: { user: User | null }) => {
             />
           </div>
           
-          {/* Profile Section - Responsive */}
-          <div className="flex items-center gap-2 p-2 border-2 border-[#1B4D3E] dashboard-card">
-            <div className="font-mono text-sm hidden sm:block">{user?.username || 'Guest'}</div>
-            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full overflow-hidden border-2 border-[#1B4D3E]">
+          {/* Compact Usage Stats Card */}
+          <div 
+            className="relative group"
+            onMouseEnter={() => setIsStatsHovered(true)}
+            onMouseLeave={() => setIsStatsHovered(false)}
+          >
+            <div className="p-3 bg-gradient-to-br from-[#f0f8ff] to-[#e6f4ff] border border-[#1B4D3E]/20 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer">
+              <div className="flex items-center gap-4">
+                {/* Tests Section */}
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-[#1B4D3E]/10 rounded-lg">
+                    <TestTube size={18} className="text-[#1B4D3E]" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs text-[#1B4D3E]/80">Tests</span>
+                    <span className="text-sm font-medium text-[#1B4D3E]">5/10</span>
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="w-px h-6 bg-[#1B4D3E]/20" />
+
+                {/* Queries Section */}
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-[#1B4D3E]/10 rounded-lg">
+                    <GraduationCap size={18} className="text-[#1B4D3E]" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs text-[#1B4D3E]/80">Queries</span>
+                    <span className="text-sm font-medium text-[#1B4D3E]">2/5</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Hover Card */}
+            <div className={`absolute top-full mt-2 w-64 transition-all duration-300 ${
+              isStatsHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+            }`}>
+              <div className="bg-white/95 backdrop-blur-sm border border-[#1B4D3E]/20 rounded-xl p-4 shadow-lg">
+                <div className="space-y-3">
+                  {/* Usage Details */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <TestTube size={16} className="text-[#1B4D3E]" />
+                        <span className="text-sm text-[#1B4D3E]">Tests</span>
+                      </div>
+                      <span className="text-sm font-medium text-[#1B4D3E]">5/10</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-[#1B4D3E]/10 rounded-full">
+                      <div className="h-full bg-gradient-to-r from-[#1B4D3E] to-[#2A6B5D] rounded-full" style={{ width: '50%' }}></div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <GraduationCap size={16} className="text-[#1B4D3E]" />
+                        <span className="text-sm text-[#1B4D3E]">Queries</span>
+                      </div>
+                      <span className="text-sm font-medium text-[#1B4D3E]">2/5</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-[#1B4D3E]/10 rounded-full">
+                      <div className="h-full bg-gradient-to-r from-[#1B4D3E] to-[#2A6B5D] rounded-full" style={{ width: '40%' }}></div>
+                    </div>
+                  </div>
+
+                  {/* Upgrade Button */}
+                  <button
+                    className="w-full mt-2 p-2 bg-gradient-to-r from-[#1B4D3E] to-[#2A6B5D] text-white text-sm rounded-lg hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2"
+                    onClick={() => {/* Add upgrade plan logic here */}}
+                  >
+                    <span>Upgrade Plan</span>
+                    <ArrowUpRight size={16} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* User Profile */}
+          <div className="flex items-center gap-2 p-2 border border-[#1B4D3E]/20 rounded-lg bg-white/50 backdrop-blur-sm">
+            <div className="font-medium text-sm hidden sm:block">{user?.username || 'Guest'}</div>
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full overflow-hidden border border-[#1B4D3E]/20">
               <Image 
                 src={user?.profileImage || '/default-avatar.png'} 
                 alt="profile" 
